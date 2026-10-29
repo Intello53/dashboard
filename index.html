@@ -26,12 +26,15 @@
       .updated.ok { background: rgba(52,199,89,0.10); color: var(--green); }
       .updated.warn { background: rgba(255,149,0,0.10); color: var(--orange); }
       .updated.err { background: rgba(255,59,48,0.10); color: var(--red); }
+      .updated.demo { background: rgba(175,82,222,0.10); color: var(--purple); }
       .refreshbtn { appearance: none; border: 0; background: var(--chip); color: var(--sub); font: inherit; font-size: 13px; border-radius: 999px; width: 36px; height: 36px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+      .refreshbtn:active { transform: scale(0.9); }
       .refreshbtn.spin { animation: spin 1s linear infinite; }
       @keyframes spin { to { transform: rotate(360deg); } }
       .seg { display: flex; background: var(--chip); border-radius: 999px; padding: 3px; }
       .seg button { appearance: none; border: 0; background: transparent; color: var(--sub); font: inherit; font-size: 12px; font-weight: 600; min-height: 36px; padding: 0 12px; border-radius: 999px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
       .seg button[aria-checked="true"] { background: var(--segactive); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
+      .seg button:active { transform: scale(0.95); }
       html[data-theme="dark"] .seg button[aria-checked="true"] { box-shadow: none; }
       .grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
       @media (min-width: 640px) { .grid { grid-template-columns: repeat(2, 1fr); } .span2 { grid-column: span 2; } }
@@ -53,20 +56,26 @@
       .legend .row { display: flex; align-items: center; justify-content: space-between; }
       .legend .lbl { display: flex; align-items: center; gap: 8px; color: var(--sub); }
       .dot { width: 10px; height: 10px; border-radius: 999px; display: inline-block; background: var(--green); }
-      .ev { display: flex; gap: 12px; align-items: flex-start; padding: 8px; border-radius: 12px; }
+      .ev { display: flex; gap: 10px; align-items: flex-start; padding: 8px; border-radius: 12px; }
       .ev.past { opacity: 0.45; }
       .ev.hl { background: rgba(175,82,222,0.06); }
-      .ev .time { width: 76px; flex-shrink: 0; text-align: right; font-size: 13px; font-weight: 600; padding-top: 2px; }
+      .ev.done { background: rgba(52,199,89,0.07); }
+      .ev .time { width: 72px; flex-shrink: 0; text-align: right; font-size: 13px; font-weight: 600; padding-top: 2px; }
       .ev .time small { font-size: 10px; font-weight: 400; color: var(--sub); }
       .ev .st { width: 8px; height: 8px; border-radius: 999px; margin-top: 8px; flex-shrink: 0; background: var(--kc); }
+      .chk { appearance: none; border: 2px solid var(--kc); background: transparent; color: #fff; width: 26px; height: 26px; border-radius: 999px; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; flex-shrink: 0; margin-top: 1px; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s, background 0.2s, border-color 0.2s; }
+      .chk:active { transform: scale(0.8); }
+      .chk.done { background: var(--green); border-color: var(--green); }
       .k-cours { --kc: var(--blue); } .k-revision { --kc: var(--purple); } .k-travail { --kc: var(--teal); }
       .k-sport { --kc: var(--green); } .k-ds { --kc: var(--red); }
       .ev .t { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; line-height: 1.3; }
       .ev .titleline { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+      .ev.done .t { text-decoration: line-through; text-decoration-color: var(--green); text-decoration-thickness: 2px; }
       .chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px; scrollbar-width: none; }
       .chips::-webkit-scrollbar { display: none; }
-      .chips button { appearance: none; border: 1px solid var(--chipborder); background: var(--chip); color: var(--text); font: inherit; font-size: 12px; font-weight: 600; min-height: 44px; min-width: 64px; border-radius: 16px; padding: 0 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0; }
+      .chips button { appearance: none; border: 1px solid var(--chipborder); background: var(--chip); color: var(--text); font: inherit; font-size: 12px; font-weight: 600; min-height: 44px; min-width: 64px; border-radius: 16px; padding: 0 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0; transition: transform 0.15s; }
       .chips button.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+      .chips button:active { transform: scale(0.93); }
       .chips .cdots { display: flex; gap: 4px; }
       .timeline { max-height: 340px; overflow-y: auto; }
       .note { font-size: 11px; color: var(--sub); margin-top: 12px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
@@ -83,15 +92,14 @@
       .rowline { display: flex; align-items: center; justify-content: space-between; font-size: 14px; }
       .rowline .r { font-size: 12px; color: var(--sub); text-align: right; }
       .box { background: var(--chip); border-radius: 12px; padding: 10px 12px; }
-      .box.warn { background: rgba(255,149,0,0.08); border: 1px solid rgba(255,149,0,0.2); }
       .sportline { font-size: 13px; display: flex; justify-content: space-between; gap: 8px; padding: 7px 2px; border-top: 1px solid var(--border); }
-      .sportline:first-of-type { border-top: 0; }
       .goal { background: var(--chip); border-radius: 12px; padding: 8px 12px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; margin-top: 10px; }
       .bignum { font-size: 40px; font-weight: 700; line-height: 1; }
       .bignum small { font-size: 20px; font-weight: 600; color: var(--sub); }
       .chart { display: flex; align-items: flex-end; gap: 6px; height: 180px; padding: 4px 0 0; }
-      .chart .col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; gap: 4px; }
-      .chart .bar { width: 100%; max-width: 30px; background: var(--blue); border-radius: 6px 6px 4px 4px; }
+      .chart .col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; gap: 4px; cursor: pointer; }
+      .chart .col:hover .bar { filter: brightness(1.1); }
+      .chart .bar { width: 100%; max-width: 30px; background: var(--blue); border-radius: 6px 6px 4px 4px; transition: height 0.6s cubic-bezier(0.33,1,0.68,1); }
       .chart .lbl { font-size: 9px; color: var(--sub); white-space: nowrap; }
       .agent { display: grid; gap: 16px; }
       @media (min-width: 640px) { .agent { grid-template-columns: 1fr 1fr; } }
@@ -108,9 +116,18 @@
       .sect { font-size: 13px; font-weight: 600; margin: 4px 0 8px; display: flex; align-items: center; gap: 6px; }
       .foot { text-align: center; font-size: 11px; color: var(--sub); margin-top: 32px; }
       .banner { border-radius: 16px; padding: 12px 16px; font-size: 14px; font-weight: 600; margin-bottom: 16px; }
+      .banner.info { background: rgba(10,132,255,0.08); border: 1px solid rgba(10,132,255,0.22); color: var(--blue); }
       .banner.warn { background: rgba(255,149,0,0.10); border: 1px solid rgba(255,149,0,0.25); color: var(--orange); }
       .banner.err { background: rgba(255,59,48,0.08); border: 1px solid rgba(255,59,48,0.25); color: var(--red); }
       .banner p { font-weight: 500; font-size: 13px; margin-top: 6px; }
+      .fbtn { appearance: none; border: 1px solid var(--chipborder); background: var(--chip); color: var(--text); font: inherit; font-size: 13px; font-weight: 700; border-radius: 999px; padding: 8px 14px; cursor: pointer; transition: transform 0.15s; }
+      .fbtn.on { background: var(--purple); border-color: var(--purple); color: #fff; }
+      .fbtn:active { transform: scale(0.92); }
+      .fbtn:disabled { opacity: 0.35; cursor: default; }
+      .confetti { position: fixed; top: -12px; border-radius: 2px; z-index: 999; pointer-events: none; animation: fall 1.9s ease-in forwards; }
+      @keyframes fall { to { transform: translateY(105vh) rotate(720deg); } }
+      .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow); color: var(--text); border-radius: 999px; padding: 10px 18px; font-size: 13px; font-weight: 600; z-index: 1000; opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; }
+      .toast.on { opacity: 1; transform: translateX(-50%) translateY(-8px); }
       button:focus-visible, a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
       @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
     </style>
@@ -135,13 +152,17 @@
 
     <script>
       /* ════════════════════════════════════════════════════════════════
-         ⚙️ CONFIGURATION — c'est le seul bloc que tu dois éditer
+         ⚙️ CONFIGURATION — le seul bloc à éditer
          ════════════════════════════════════════════════════════════════
-         1) Va sur calendar.google.com → ⚙️ Paramètres → « Paramètres de mes
-            agendas » → ton agenda principal.
-         2) Descends jusqu'à « Adresse secrète au format iCal » → copie-la.
-         3) Colle-la ci-dessous entre les guillemets, à la place du texte
-            COLLE_ICI. Le dashboard se synchronisera alors tout seul.
+         Le planning est lu EN DIRECT dans ton Google Calendar.
+         Pour activer le temps réel :
+           1) calendar.google.com → ⚙️ Paramètres → « Paramètres de mes
+              agendas » → ton agenda principal.
+           2) « Adresse secrète au format iCal » → copie.
+           3) Colle-la ci-dessous entre les guillemets, en remplaçant
+              le texte COLLE_ICI.
+         Tant que ce n'est pas fait, le site tourne en MODE DÉMO
+         (données d'exemple) : tout est interactif déjà.
       ══════════════════════════════════════════════════════════════════ */
 
       var ICAL_URL = "https://calendar.google.com/calendar/ical/edbadoglu%40gmail.com/private-47730d4acea432afef7856082198149f/basic.ics";
@@ -154,15 +175,14 @@
         { subject: "Sciences de l'Ingénieur", when: "jeudi 5 nov. · 10h", at: "2026-11-05T10:00:00+01:00", icon: "⚙️", done: 0, total: 3 }
       ];
 
-      var RING = { fait: 3, objectif: 20 };      // heures accomplies (à ajuster) + objectif hebdo
-      var NOTES = [];                            // [{ subject: "Maths", value: "18/20", date: "3 nov." }]
+      var RING = { base: 3, objectif: 20 };  // heures accomplies de base (config) + objectif hebdo
+      var NOTES = [];                       // [{ subject: "Maths", value: "18/20", date: "3 nov." }]
       var OBJECTIFS = ["🚩 Prépa MPSI → MP*", "🎯 ISAE-SUPAERO · INSA Toulouse", "⏱️ 15–20 h de travail perso / semaine"];
       var STATIC_SPORT = [
         { t: "🏐 Volleyball", r: "mardi & vendredi · 18h–20h" },
         { t: "🥋 Karaté", r: "mercredi · 18h30–20h" }
       ];
 
-      /* Règles de classification automatique des événements du calendrier */
       var KIND_RULES = [
         { re: /\bDS\b|devoir surveillé|interrogation|composition/i, kind: "ds" },
         { re: /volley|karat|match|entraînement|entrainement|sport|EPS/i, kind: "sport" },
@@ -178,8 +198,7 @@
       var KINDRGB = { cours: "0,122,255", revision: "175,82,222", travail: "0,163,191", sport: "52,199,89", ds: "255,59,48" };
       var SHORTDAYS = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
 
-      /* Données de secours (snapshot du 28 oct. 2026) — affichées uniquement
-         si le calendrier est injoignable et aucune synchro n'a jamais réussi. */
+      /* Données de MODE DÉMO (snapshot du 28 oct. 2026) */
       var FALLBACK = [
         { d: "2026-10-29", s: "09:30", e: "11:00", t: "Révision SI #1", k: "revision", o: "Schéma-blocs : chaîne d'énergie + d'information" },
         { d: "2026-10-29", s: "13:30", e: "14:30", t: "Histoire-Géo & EMC", k: "revision", o: "Fiche EMC + relecture active HG" },
@@ -232,15 +251,96 @@
 
       var state = { events: [], lastSync: null, source: "setup", syncing: false };
 
+      /* ---------- Stockage sûr (localStorage + mémoire de secours) ---------- */
+      var memStore = {};
+      function sget(k) { try { return localStorage.getItem(k); } catch (e) { return Object.prototype.hasOwnProperty.call(memStore, k) ? memStore[k] : null; } }
+      function sset(k, v) { try { localStorage.setItem(k, v); } catch (e) { memStore[k] = v; } }
+
+      /* ---------- Révisions cochées + sessions focus ---------- */
+      function loadChecks() {
+        try { return JSON.parse(sget("dogukan-dash-checks") || "{}") || {}; } catch (e) { return {}; }
+      }
+      function saveChecks(c) { sset("dogukan-dash-checks", JSON.stringify(c)); }
+      function loadFocusLog() {
+        try { return JSON.parse(sget("dogukan-dash-focus") || "[]") || []; } catch (e) { return []; }
+      }
+      function saveFocusLog(f) { sset("dogukan-dash-focus", JSON.stringify(f.slice(-400))); }
+
+      function weekDays(now) {
+        var mon = new Date(now || new Date()); mon.setHours(0, 0, 0, 0);
+        mon.setDate(mon.getDate() - ((mon.getDay() + 6) % 7));
+        var out = [], d = new Date(mon);
+        for (var i = 0; i < 7; i++) { out.push(dkey(d)); d = new Date(d); d.setDate(d.getDate() + 1); }
+        return out;
+      }
+      function doneMinutes(now) {
+        var wk = {}; weekDays(now).forEach(function (k) { wk[k] = 1; });
+        var min = 0, c = loadChecks();
+        Object.keys(c).forEach(function (k) { if (wk[c[k].d]) min += c[k].min || 0; });
+        loadFocusLog().forEach(function (s) { if (wk[s.d]) min += s.min || 0; });
+        return min;
+      }
+      function todayMinutes(now) {
+        var tk = dkey(now || new Date()), min = 0, c = loadChecks();
+        Object.keys(c).forEach(function (k) { if (c[k].d === tk) min += c[k].min || 0; });
+        loadFocusLog().forEach(function (s) { if (s.d === tk) min += s.min || 0; });
+        return min;
+      }
+      function streakDays() {
+        var c = loadChecks(), set = {};
+        Object.keys(c).forEach(function (k) { set[c[k].d] = 1; });
+        loadFocusLog().forEach(function (s) { set[s.d] = 1; });
+        var d = new Date(); d.setHours(0, 0, 0, 0);
+        if (!set[dkey(d)]) d.setDate(d.getDate() - 1); // la série peut être "en attente" aujourd'hui
+        var n = 0;
+        while (set[dkey(d)]) { n++; d.setDate(d.getDate() - 1); }
+        return n;
+      }
+
+      /* ---------- Confettis, toast, son ---------- */
+      function confetti() {
+        var cols = ["#0a84ff", "#34c759", "#af52de", "#ff9500", "#ff3b30"];
+        for (var i = 0; i < 28; i++) {
+          (function (i) {
+            var el = document.createElement("div");
+            el.className = "confetti";
+            el.style.left = (5 + Math.random() * 90) + "vw";
+            el.style.background = cols[i % cols.length];
+            el.style.width = el.style.height = (6 + Math.random() * 6) + "px";
+            el.style.animationDelay = (Math.random() * 0.35) + "s";
+            el.style.animationDuration = (1.5 + Math.random() * 0.9) + "s";
+            document.body.appendChild(el);
+            setTimeout(function () { el.remove(); }, 2700);
+          })(i);
+        }
+      }
+      var toastTimer = null;
+      function toast(msg) {
+        var t = document.getElementById("toast");
+        if (!t) { t = document.createElement("div"); t.id = "toast"; t.className = "toast"; document.body.appendChild(t); }
+        t.textContent = msg;
+        t.classList.add("on");
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { t.classList.remove("on"); }, 2400);
+      }
+      function beep() {
+        try {
+          var C = window.AudioContext || window.webkitAudioContext; if (!C) return;
+          var ctx = new C(), o = ctx.createOscillator(), g = ctx.createGain();
+          o.connect(g); g.connect(ctx.destination);
+          o.frequency.value = 880; g.gain.value = 0.07; o.start();
+          setTimeout(function () { o.frequency.value = 1320; }, 160);
+          setTimeout(function () { try { o.stop(); ctx.close(); } catch (e) {} }, 400);
+        } catch (e) {}
+      }
+
       /* ---------- Utilitaires ---------- */
       function pad(n) { return String(n).padStart(2, "0"); }
       function fr(n) { return String(n).replace(".", ","); }
       function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
       function fmtH(d) { return pad(d.getHours()) + "h" + pad(d.getMinutes()); }
       function dkey(d) { return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
-      function frDate(d) {
-        return cap(new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long" }).format(d));
-      }
+      function frDate(d) { return cap(new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long" }).format(d)); }
       function frDateTime(d) { return SHORTDAYS[d.getDay()] + " " + d.getDate() + " · " + fmtH(d); }
       function countdown(now, target) {
         var ms = target.getTime() - now.getTime();
@@ -310,21 +410,13 @@
       function withTimeout(p, ms) {
         return Promise.race([p, new Promise(function (_, r) { setTimeout(function () { r(new Error("timeout")); }, ms); })]);
       }
-      function saveCache() {
-        try { localStorage.setItem("dogukan-dash-cache-v1", JSON.stringify({ ts: state.lastSync.getTime(), events: state.events })); } catch (e) {}
-      }
-      function loadCache() {
-        try {
-          var raw = localStorage.getItem("dogukan-dash-cache-v1"); if (!raw) return null;
-          var c = JSON.parse(raw);
-          c.events = c.events.map(function (e) { return { title: e.title, kind: e.kind, obj: e.obj, start: new Date(e.start), end: new Date(e.end), allDay: e.allDay }; });
-          return c;
-        } catch (e) { return null; }
-      }
       async function sync() {
-        if (!urlOk() || state.syncing) { render(); return; }
+        if (!urlOk() || state.syncing) {
+          if (!urlOk() && state.source !== "live") { state.events = FALLBACK; state.source = "demo"; }
+          state.syncing = false; render(); return;
+        }
         state.syncing = true;
-        var btn = document.getElementById("refreshbtn"); btn.classList.add("spin");
+        var btn = document.getElementById("refreshbtn"); if (btn) btn.classList.add("spin");
         var url = ICAL_URL + (ICAL_URL.indexOf("?") < 0 ? "?" : "&") + "_=" + Date.now();
         for (var i = 0; i < PROXIES.length; i++) {
           try {
@@ -334,43 +426,107 @@
             if (text.indexOf("BEGIN:VCALENDAR") === -1) throw new Error("réponse invalide");
             state.events = parseICS(text);
             state.lastSync = new Date(); state.source = "live"; saveCache();
-            state.syncing = false; btn.classList.remove("spin"); render(); return;
+            state.syncing = false; if (btn) btn.classList.remove("spin"); render(); return;
           } catch (e) { /* essai le relais suivant */ }
         }
         var c = loadCache();
         if (c) { state.events = c.events; state.lastSync = new Date(c.ts); state.source = "cache"; }
-        else if (state.source !== "live") { state.events = FALLBACK; state.source = "fallback"; }
-        state.syncing = false; btn.classList.remove("spin"); render();
+        else { state.events = FALLBACK; state.source = "demo"; }
+        state.syncing = false; if (btn) btn.classList.remove("spin"); render();
+      }
+      function saveCache() {
+        try { sset("dogukan-dash-cache-v1", JSON.stringify({ ts: state.lastSync.getTime(), events: state.events })); } catch (e) {}
+      }
+      function loadCache() {
+        try {
+          var raw = sget("dogukan-dash-cache-v1"); if (!raw) return null;
+          var c = JSON.parse(raw);
+          c.events = c.events.map(function (e) { return { title: e.title, kind: e.kind, obj: e.obj, start: new Date(e.start), end: new Date(e.end), allDay: e.allDay }; });
+          return c;
+        } catch (e) { return null; }
       }
 
-      /* ---------- Construction des journées ---------- */
-      function buildDays() {
-        var days = [], base = new Date(); base.setHours(0, 0, 0, 0);
-        for (var i = 0; i < DAYS_COUNT; i++) { var d = new Date(base); d.setDate(d.getDate() + i); days.push({ d: d, events: [] }); }
-        var map = {}; days.forEach(function (x) { map[dkey(x.d)] = x; });
-        state.events.forEach(function (ev) {
-          var k = dkey(ev.start);
-          if (map[k]) map[k].events.push(ev);
-        });
-        days.forEach(function (x) { x.events.sort(function (a, b) { return a.start - b.start; }); });
-        return days;
+      /* ---------- Minuteur focus ---------- */
+      var focus = { running: false, paused: false, preset: 25, leftSec: 25 * 60, endAt: 0, timerId: null };
+      function focusLeft() {
+        if (focus.running && !focus.paused) return Math.max(0, Math.round((focus.endAt - Date.now()) / 1000));
+        return focus.leftSec;
       }
-      function weekPlanHours() {
-        var now = new Date(), mon = new Date(now); mon.setHours(0, 0, 0, 0);
-        mon.setDate(mon.getDate() - ((mon.getDay() + 6) % 7));
-        var h = 0;
-        state.events.forEach(function (e) {
-          if ((e.kind === "revision" || e.kind === "travail") && e.start >= mon && e.start < new Date(mon.getTime() + 7 * 86400000)) h += (e.end - e.start) / 3600000;
+      function focusToggle() {
+        if (!focus.running) {
+          focus.running = true; focus.paused = false;
+          focus.endAt = Date.now() + focus.leftSec * 1000;
+          focus.timerId = setInterval(focusTick, 250);
+        } else if (focus.paused) {
+          focus.paused = false;
+          focus.endAt = Date.now() + focus.leftSec * 1000;
+          focus.timerId = setInterval(focusTick, 250);
+        } else {
+          focus.paused = true; focus.leftSec = Math.max(0, Math.round((focus.endAt - Date.now()) / 1000));
+          clearInterval(focus.timerId); focus.timerId = null;
+        }
+        renderFocus();
+      }
+      function focusReset(silent) {
+        focus.running = false; focus.paused = false; focus.leftSec = focus.preset * 60;
+        if (focus.timerId) { clearInterval(focus.timerId); focus.timerId = null; }
+        if (!silent) toast("Minuteur réinitialisé");
+        renderFocus();
+      }
+      function focusTick() {
+        focus.leftSec = Math.max(0, Math.round((focus.endAt - Date.now()) / 1000));
+        if (focus.leftSec <= 0) {
+          var min = focus.preset;
+          var log = loadFocusLog(); log.push({ d: dkey(new Date()), min: min }); saveFocusLog(log);
+          focus.running = false; focus.paused = false; focus.leftSec = focus.preset * 60;
+          if (focus.timerId) { clearInterval(focus.timerId); focus.timerId = null; }
+          confetti(); beep();
+          toast("🔥 Session de " + min + " min validée — bien joué !");
+          render();
+        } else renderFocus();
+      }
+      function focusSet(min) {
+        if (focus.running) return;
+        focus.preset = min; focus.leftSec = min * 60;
+        renderFocus();
+      }
+      function renderFocus() {
+        var t = document.getElementById("focusTime");
+        if (!t) return;
+        var left = focusLeft();
+        t.textContent = pad(Math.floor(left / 60)) + ":" + pad(left % 60);
+        var arc = document.getElementById("focusArc");
+        if (arc) {
+          var frac = 1 - left / (focus.preset * 60);
+          arc.setAttribute("stroke-dashoffset", String(2 * Math.PI * 78 * (1 - frac)));
+        }
+        var st = document.getElementById("focusState");
+        if (st) st.textContent = !focus.running ? "prêt" : (focus.paused ? "en pause" : "en cours");
+        var go = document.getElementById("focusGo");
+        if (go) go.textContent = !focus.running ? "▶ Démarrer" : (focus.paused ? "⏯ Reprendre" : "⏸ Pause");
+        document.querySelectorAll(".fbtn[data-m]").forEach(function (b) {
+          b.disabled = focus.running;
+          b.classList.toggle("on", +b.getAttribute("data-m") === focus.preset && !focus.running);
         });
-        return Math.round(h * 4) / 4;
+        var sn = document.getElementById("streakN");
+        if (sn) sn.textContent = streakDays();
       }
 
       /* ---------- Rendu ---------- */
-      var selectedDay = null, animated = false;
+      var selectedDay = null, animated = false, scrollChip = false;
+      var EVREG = [];
+      function evKey(ev) { return dkey(ev.start) + "|" + fmtH(ev.start) + "|" + ev.title; }
 
       function evRow(ev, past, hl, now, showDay) {
         var c = countdown(now, ev.start);
         var running = ev.start <= now && now < ev.end;
+        var canCheck = ev.kind === "revision" || ev.kind === "travail";
+        var checked = false;
+        if (canCheck) { checked = !!loadChecks()[evKey(ev)]; EVREG.push(ev); }
+        var idx = EVREG.length - 1;
+        var leftSlot = canCheck
+          ? '<button class="chk' + (checked ? " done" : "") + '" data-i="' + idx + '" title="Marquer comme fait" aria-label="Marquer comme fait">' + (checked ? "✔" : "") + "</button>"
+          : '<div class="st" aria-hidden="true"></div>';
         var badge = "";
         var dayPill = "";
         if (showDay) dayPill = '<span class="pill" style="background:rgba(' + KINDRGB[ev.kind] + ',0.10);color:rgb(' + KINDRGB[ev.kind] + ')">' + SHORTDAYS[ev.start.getDay()] + " " + ev.start.getDate() + "</span>";
@@ -378,8 +534,8 @@
         else if (running) badge = '<span class="pill" style="background:rgba(' + KINDRGB[ev.kind] + ',0.10);color:rgb(' + KINDRGB[ev.kind] + ')">En cours</span>';
         else if (hl) badge = '<span class="pill" style="color:var(--kc)">' + (c.d > 0 ? "J–" + c.d : "dans " + c.h + "h" + pad(c.m)) + "</span>";
         var timeHtml = ev.allDay ? "journée" : fmtH(ev.start) + ' <small>– ' + fmtH(ev.end) + "</small>";
-        return '<div class="ev k-' + ev.kind + (past ? " past" : "") + (hl ? " hl" : "") + '">' +
-          '<div class="time tnum">' + timeHtml + '</div><div class="st" aria-hidden="true"></div>' +
+        return '<div class="ev k-' + ev.kind + (past ? " past" : "") + (hl ? " hl" : "") + (checked ? " done" : "") + '">' +
+          '<div class="time tnum">' + timeHtml + "</div>" + leftSlot +
           '<div style="flex:1;min-width:0"><div class="titleline"><span class="t">' + ev.title + "</span>" + dayPill + badge + "</div>" +
           (ev.obj ? '<p style="font-size:12px;color:var(--sub);margin:2px 0 0">' + ev.obj + "</p>" : "") + "</div></div>";
       }
@@ -392,8 +548,9 @@
       function render() {
         var now = new Date(), todayK = dkey(now);
         var app = document.getElementById("app");
-        var chipScroll = 0, chipEl = document.querySelector(".chips");
-        if (chipEl) chipScroll = chipEl.scrollLeft;
+        var chipEl = document.querySelector(".chips");
+        var chipScroll = chipEl ? chipEl.scrollLeft : 0;
+        EVREG = [];
 
         document.getElementById("hdrsub").textContent = frDate(now) + (SUBTITLE ? " · " + SUBTITLE : "");
 
@@ -401,29 +558,33 @@
         var badge = document.getElementById("syncbadge");
         if (state.source === "live") { badge.className = "updated ok"; badge.textContent = "🟢 En direct · synchro " + fmtH(state.lastSync); }
         else if (state.source === "cache") { badge.className = "updated warn"; badge.textContent = "🟡 Hors-ligne · dernière synchro " + fmtH(state.lastSync); }
-        else if (state.source === "fallback") { badge.className = "updated err"; badge.textContent = "🟠 Données de secours · 28 oct."; }
-        else { badge.className = "updated err"; badge.textContent = state.syncing ? "⏳ Synchronisation…" : "🔴 Calendrier à connecter"; }
+        else if (state.source === "demo") { badge.className = "updated demo"; badge.textContent = "🟣 Mode démo — aperçu"; }
+        else { badge.className = "updated err"; badge.textContent = state.syncing ? "⏳ Synchronisation…" : "🔴 À connecter"; }
 
         /* Bannière d'état */
         var banner = document.getElementById("banner");
         if (!urlOk()) {
-          banner.innerHTML = '<div class="banner err" role="alert">🔌 Connecte ton Google Calendar pour activer le temps réel.<p>Google Calendar → ⚙️ Paramètres → Paramètres de mes agendas → ton agenda → « Adresse secrète au format iCal » → copie, puis colle-la dans le fichier <b>index.html</b> à la ligne <b>var ICAL_URL = "…"</b> (remplace COLLE_ICI). En attendant, affichage des données de secours.</p></div>';
-        } else if (state.source === "fallback") {
-          banner.innerHTML = '<div class="banner warn" role="alert">⚠️ Calendrier injoignable pour l\'instant — nouvel essai automatique dans quelques minutes.<p>Affichage des données de secours du 28 octobre.</p></div>';
+          banner.innerHTML = '<div class="banner info" role="status">🟣 Mode démo — tu regardes l\'aperçu avec des données d\'exemple. Tout est déjà interactif : coche tes révisions, lance un minuteur, change de jour…<p>Sur ton site, connecte ton agenda pour le temps réel : Google Calendar → ⚙️ Paramètres → ton agenda → « Adresse secrète au format iCal » → colle-la dans le fichier <b>index.html</b> à la ligne <b>var ICAL_URL = "…"</b> (remplace COLLE_ICI).</p></div>';
+        } else if (state.source === "demo") {
+          banner.innerHTML = '<div class="banner warn" role="alert">⚠️ Calendrier injoignable pour l\'instant — nouvel essai automatique dans quelques minutes.<p>Affichage des données de démonstration.</p></div>';
         } else if (state.source === "cache") {
-          banner.innerHTML = '<div class="banner warn" role="alert">🟡 Hors-ligne — le calendrier n\'est pas joignable, affichage de la dernière synchro (' + fmtH(state.lastSync) + ").</p></div>";
+          banner.innerHTML = '<div class="banner warn" role="alert">🟡 Hors-ligne — le calendrier n\'est pas joignable, affichage de la dernière synchro (' + fmtH(state.lastSync) + ").</div>";
         } else banner.innerHTML = "";
 
-        var days = buildDays();
+        var days = [];
+        var base = new Date(); base.setHours(0, 0, 0, 0);
+        for (var i = 0; i < DAYS_COUNT; i++) { var d0 = new Date(base); d0.setDate(d0.getDate() + i); days.push({ d: d0, events: [] }); }
+        var map = {}; days.forEach(function (x) { map[dkey(x.d)] = x; });
+        state.events.forEach(function (ev) { var k = dkey(ev.start); if (map[k]) map[k].events.push(ev); });
+        days.forEach(function (x) { x.events.sort(function (a, b) { return a.start - b.start; }); });
+
         var day = days.find(function (x) { return dkey(x.d) === (selectedDay || todayK); }) || days[0];
 
-        /* Événements à venir (toutes journées confondues) */
         var upcoming = [];
         days.forEach(function (x) { x.events.forEach(function (e) { if (e.end > now) upcoming.push(e); }); });
         var nextFirst = upcoming[0] || null;
         var ncd = nextFirst ? countdown(now, nextFirst.start) : null;
 
-        /* Héros : prochain DS (config + calendrier) */
         var dlEvents = DEADLINES.map(function (d) { return { title: d.subject, when: d.when, at: new Date(d.at) }; }).filter(function (h) { return h.at > now; }).sort(function (a, b) { return a.at - b.at; });
         var dsEvents = upcoming.filter(function (e) { return e.kind === "ds"; });
         var hero = null;
@@ -432,13 +593,20 @@
         else hero = { title: "Tous les DS sont passés 🎉", when: "Profite bien", at: null, next: null };
         var heroC = hero.at ? countdown(now, hero.at) : null;
 
-        /* Charge de travail */
         var charge = days.map(function (x) {
           var h = 0; x.events.forEach(function (e) { if (e.kind === "revision" || e.kind === "travail") h += (e.end - e.start) / 3600000; });
-          return { name: SHORTDAYS[x.d.getDay()] + " " + x.d.getDate(), heures: Math.round(h * 4) / 4, ds: x.events.some(function (e) { return e.kind === "ds"; }) };
+          return { name: SHORTDAYS[x.d.getDay()] + " " + x.d.getDate(), k: dkey(x.d), heures: Math.round(h * 4) / 4, ds: x.events.some(function (e) { return e.kind === "ds"; }) };
         });
-        var maxH = Math.max(1, Math.max.apply(null, charge.map(function (c) { return c.heures; })));
-        var planifie = weekPlanHours();
+        var maxH = Math.max(0.75, Math.max.apply(null, charge.map(function (c) { return c.heures; })));
+        var planifie = 0;
+        state.events.forEach(function (e) {
+          var wk = weekDays(now);
+          if ((e.kind === "revision" || e.kind === "travail") && wk.indexOf(dkey(e.start)) >= 0) planifie += (e.end - e.start) / 3600000;
+        });
+        planifie = Math.round(planifie * 4) / 4;
+        var accompli = Math.round((RING.base + doneMinutes(now) / 60) * 4) / 4;
+        var todayMin = todayMinutes(now);
+        var streak = streakDays();
 
         var html = "";
 
@@ -453,26 +621,28 @@
           "</div>" +
           '<div style="background:rgba(255,255,255,0.16);border-radius:12px;padding:10px 12px;font-size:13px;font-weight:500;margin-top:16px">' +
           (hero.next
-            ? "Puis : " + hero.next.title + ' · <b class="tnum">' + (function () { var c = countdown(now, hero.next.at || hero.next.start); return c.past ? "—" : "J–" + c.d; })() + "</b>"
+            ? "Puis : " + hero.next.title + ' · <b class="tnum">' + (function () { var c2 = countdown(now, hero.next.at || hero.next.start); return c2.past ? "—" : "J–" + c2.d; })() + "</b>"
             : "Aucune autre échéance en vue 🎉") +
           "</div></section>";
 
-        html += '<section class="card" aria-label="Progression du travail perso">' +
-          '<div class="head"><div class="l"><span class="ico" style="background:rgba(255,59,48,0.1)">📊</span><div><h2>Travail perso — cette semaine</h2><p class="sub">Anneaux : accompli · planifié (auto) · objectif</p></div></div></div>' +
-          '<div style="display:flex;justify-content:center"><svg viewBox="0 0 200 200" width="170" height="170" role="img" aria-label="Accompli ' + RING.fait + " heures sur un objectif de " + RING.objectif + " heures, " + planifie + ' heures planifiées">' +
-          '<g transform="rotate(-90 100 100)">' +
-          '<circle cx="100" cy="100" r="78" fill="none" stroke="var(--chip)" stroke-width="12"/>' + ringSvg("ringR", 78, "var(--red)") +
-          '<circle cx="100" cy="100" r="62" fill="none" stroke="var(--chip)" stroke-width="12"/>' + ringSvg("ringB", 62, "var(--blue)") +
-          '<circle cx="100" cy="100" r="46" fill="none" stroke="var(--chip)" stroke-width="12"/>' + ringSvg("ringG", 46, "var(--green)") +
-          "</g>" +
-          '<text x="100" y="96" text-anchor="middle" font-size="30" font-weight="700" fill="var(--text)">' + fr(planifie) + 'h</text>' +
-          '<text x="100" y="116" text-anchor="middle" font-size="11" fill="var(--sub)">planifiées (auto)</text>' +
+        /* Carte focus */
+        var fleft = focusLeft();
+        html += '<section class="card" aria-label="Session focus">' +
+          '<div class="head"><div class="l"><span class="ico" style="background:rgba(175,82,222,0.12)">🎯</span><div><h2>Session focus</h2><p class="sub">Lance un chrono — il compte dans tes anneaux</p></div></div></div>' +
+          '<div style="display:flex;justify-content:center"><svg viewBox="0 0 200 200" width="150" height="150" role="img" aria-label="Minuteur de session focus">' +
+          '<circle cx="100" cy="100" r="78" fill="none" stroke="var(--chip)" stroke-width="10"/>' +
+          '<circle id="focusArc" cx="100" cy="100" r="78" fill="none" stroke="var(--purple)" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + (2 * Math.PI * 78) + '" stroke-dashoffset="' + (2 * Math.PI * 78) + '" style="transition: stroke-dashoffset 0.4s linear" transform="rotate(-90 100 100)"/>' +
+          '<text id="focusTime" x="100" y="100" text-anchor="middle" dominant-baseline="middle" font-size="34" font-weight="700" fill="var(--text)" class="tnum">' + pad(Math.floor(fleft / 60)) + ":" + pad(fleft % 60) + "</text>" +
+          '<text id="focusState" x="100" y="132" text-anchor="middle" font-size="11" fill="var(--sub)">' + (!focus.running ? "prêt" : (focus.paused ? "en pause" : "en cours")) + "</text>" +
           "</svg></div>" +
-          '<div class="legend">' +
-          [["var(--green)", "Accompli (à ajuster dans le fichier)", RING.fait + "h"], ["var(--blue)", "Planifié cette semaine — calculé en direct", fr(planifie) + "h"], ["var(--red)", "Objectif max / semaine", RING.objectif + "h"]].map(function (r) {
-            return '<div class="row"><span class="lbl"><span class="dot" style="background:' + r[0] + '"></span>' + r[1] + '</span><b class="tnum">' + r[2] + "</b></div>";
-          }).join("") +
-          "</div></section>";
+          '<div style="display:flex;gap:8px;justify-content:center;margin-top:14px">' +
+          [25, 45, 60].map(function (m) { return '<button class="fbtn' + (m === focus.preset && !focus.running ? " on" : "") + '" data-m="' + m + '"' + (focus.running ? " disabled" : "") + ">" + m + " min</button>"; }).join("") +
+          "</div>" +
+          '<div style="display:flex;gap:8px;justify-content:center;margin-top:12px">' +
+          '<button class="fbtn on" id="focusGo" style="min-width:132px">' + (!focus.running ? "▶ Démarrer" : (focus.paused ? "⏯ Reprendre" : "⏸ Pause")) + "</button>" +
+          '<button class="fbtn" id="focusStop" title="Réinitialiser">✕</button></div>' +
+          '<p class="note" style="justify-content:center">🔥 Série : <b id="streakN">' + streak + "</b> jour" + (streak > 1 ? "s" : "") + ' · Aujourd\'hui : <b class="tnum">' + todayMin + "</b> min validés</p>" +
+          '<p style="font-size:12px;color:var(--sub);margin-top:8px;text-align:center">Coche aussi tes révisions dans le planning : tout se cumule dans l\'anneau accompli.</p></section>';
 
         html += '<section class="card" aria-label="Prochaine activité">' +
           '<div class="head"><div class="l"><span class="ico" style="background:rgba(0,122,255,0.1)">🔔</span><div><h2>À venir' + (nextFirst && ncd && !ncd.past ? " — dans " + (ncd.d > 0 ? "J–" + ncd.d : ncd.h + "h" + pad(ncd.m)) : "") + '</h2><p class="sub">' + (upcoming.length ? upcoming.length + " créneau" + (upcoming.length > 1 ? "x" : "") + " dans les " + DAYS_COUNT + " prochains jours" : "aucun créneau") + "</p></div></div></div>";
@@ -480,7 +650,7 @@
           html += upcoming.slice(0, 5).map(function (ev) { return evRow(ev, false, ev === nextFirst, now, dkey(ev.start) !== todayK); }).join("");
           if (upcoming.length > 5) html += '<p style="font-size:12px;font-weight:600;color:var(--sub);padding:4px 8px 0">+ ' + (upcoming.length - 5) + " autres — voir le planning ↓</p>";
         } else {
-          html += '<p style="font-size:14px;color:var(--sub)">Rien à venir dans ton agenda pour les ' + DAYS_COUNT + ' prochains jours.</p>';
+          html += '<p style="font-size:14px;color:var(--sub)">Rien à venir dans ton agenda pour les ' + DAYS_COUNT + " prochains jours.</p>";
         }
         html += "</section>";
 
@@ -500,7 +670,25 @@
           '<div class="timeline">' + (day.events.length
             ? day.events.map(function (ev) { return evRow(ev, dkey(day.d) === todayK && ev.end <= now, false, now, false); }).join("")
             : '<p style="font-size:14px;color:var(--sub);padding:8px">Aucun créneau ce jour-là dans ton agenda.</p>') + "</div>" +
-          '<p class="note"><span class="lbl"><span class="dot" style="width:6px;height:6px;background:var(--red)"></span> DS</span><span class="lbl"><span class="dot" style="width:6px;height:6px;background:var(--green)"></span> Sport</span><span class="lbl"><span class="dot" style="width:6px;height:6px;background:var(--purple)"></span> Révision</span>Synchronisé automatiquement avec ton Google Calendar</p></section>';
+          '<p class="note"><span class="lbl"><span class="dot" style="width:6px;height:6px;background:var(--red)"></span> DS</span><span class="lbl"><span class="dot" style="width:6px;height:6px;background:var(--green)"></span> Sport</span><span class="lbl"><span class="dot" style="width:6px;height:6px;background:var(--purple)"></span> Révision</span>Clique les ronds pour valider tes révisions</p></section>';
+
+        html += '<section class="card" aria-label="Progression du travail perso">' +
+          '<div class="head"><div class="l"><span class="ico" style="background:rgba(255,59,48,0.1)">📊</span><div><h2>Travail perso — cette semaine</h2><p class="sub">Accompli · planifié · objectif</p></div></div></div>' +
+          '<div style="display:flex;justify-content:center"><svg viewBox="0 0 200 200" width="170" height="170" role="img" aria-label="Accompli ' + fr(accompli) + " heures sur un objectif de " + RING.objectif + " heures, " + fr(planifie) + ' heures planifiées">' +
+          '<g transform="rotate(-90 100 100)">' +
+          '<circle cx="100" cy="100" r="78" fill="none" stroke="var(--chip)" stroke-width="12"/>' + ringSvg("ringR", 78, "var(--red)") +
+          '<circle cx="100" cy="100" r="62" fill="none" stroke="var(--chip)" stroke-width="12"/>' + ringSvg("ringB", 62, "var(--blue)") +
+          '<circle cx="100" cy="100" r="46" fill="none" stroke="var(--chip)" stroke-width="12"/>' + ringSvg("ringG", 46, "var(--green)") +
+          "</g>" +
+          '<text x="100" y="96" text-anchor="middle" font-size="30" font-weight="700" fill="var(--text)">' + fr(planifie) + 'h</text>' +
+          '<text x="100" y="116" text-anchor="middle" font-size="11" fill="var(--sub)">planifiées</text>' +
+          "</svg></div>" +
+          '<div class="legend">' +
+          [["var(--green)", "Accompli (base + sessions validées)", fr(accompli) + "h"], ["var(--blue)", "Planifié cette semaine — en direct", fr(planifie) + "h"], ["var(--red)", "Objectif max / semaine", RING.objectif + "h"]].map(function (r) {
+            return '<div class="row"><span class="lbl"><span class="dot" style="background:' + r[0] + '"></span>' + r[1] + '</span><b class="tnum">' + r[2] + "</b></div>";
+          }).join("") +
+          "</div>" +
+          '<p style="font-size:12px;color:var(--sub);margin-top:12px">Chaque révision cochée et chaque session focus terminée s\'ajoute automatiquement. 🔥 Série en cours : ' + streak + " jour" + (streak > 1 ? "s" : "") + ".</p></section>";
 
         html += '<section class="card" aria-label="Échéances">' +
           '<div class="head"><div class="l"><span class="ico" style="background:rgba(255,59,48,0.1)">🎯</span><div><h2>Échéances</h2><p class="sub">Préparation des DS</p></div></div></div>';
@@ -517,7 +705,7 @@
         html += '<section class="card" aria-label="Sport">' +
           '<div class="head"><div class="l"><span class="ico" style="background:rgba(52,199,89,0.12)">❤️</span><div><h2>Sport</h2><p class="sub">Créneaux fixes — intouchables</p></div></div></div>' +
           STATIC_SPORT.map(function (s) { return '<div class="rowline" style="margin-bottom:10px"><b>' + s.t + '</b><span class="r">' + s.r + "</span></div>"; }).join("") +
-          (sports.length ? '<p class="sect" style="margin-top:12px">Prochains créneaux (auto depuis ton agenda) :</p>' + sports.slice(0, 4).map(function (e) { return '<div class="sportline"><span>' + e.title + '</span><span class="tnum" style="color:var(--sub)">' + frDateTime(e.start) + " – " + fmtH(e.end) + "</span></div>"; }).join("") : '<div class="box" style="margin-top:10px"><p style="font-size:13px;color:var(--sub)">Aucun créneau sportif à venir dans l\'agenda.</p></div>') + "</section>";
+          (sports.length ? '<p class="sect" style="margin-top:12px">Prochains créneaux (en direct depuis ton agenda) :</p>' + sports.slice(0, 4).map(function (e) { return '<div class="sportline"><span>' + e.title + '</span><span class="tnum" style="color:var(--sub)">' + frDateTime(e.start) + " – " + fmtH(e.end) + "</span></div>"; }).join("") : '<div class="box" style="margin-top:10px"><p style="font-size:13px;color:var(--sub)">Aucun créneau sportif à venir dans l\'agenda.</p></div>') + "</section>";
 
         html += '<section class="card" aria-label="Objectifs">' +
           '<div class="head"><div class="l"><span class="ico" style="background:rgba(0,122,255,0.1)">🚀</span><div><h2>Objectifs</h2><p class="sub">Cap sur 2027–2028</p></div></div></div>' +
@@ -532,9 +720,9 @@
           '<p style="font-size:12px;color:var(--sub);margin-top:12px">Objectif : rester au-dessus de 19 de moyenne générale.</p></section>';
 
         html += '<section class="card" aria-label="Charge de travail">' +
-          '<div class="head"><div class="l"><span class="ico" style="background:rgba(0,122,255,0.1)">📊</span><div><h2>Charge de travail perso</h2><p class="sub">Heures planifiées · ' + DAYS_COUNT + ' prochains jours</p></div></div></div>' +
+          '<div class="head"><div class="l"><span class="ico" style="background:rgba(0,122,255,0.1)">📊</span><div><h2>Charge de travail perso</h2><p class="sub">Heures planifiées · clique une barre pour voir le jour</p></div></div></div>' +
           '<div class="chart">' + charge.map(function (c) {
-            return '<div class="col"><div class="bar" style="height:' + Math.max(2, (c.heures / maxH) * 100) + '%" title="' + fr(c.heures) + ' h de travail perso"></div><span class="lbl">' + c.name + (c.ds ? " ⚠️" : "") + "</span></div>";
+            return '<div class="col" data-day="' + c.k + '" title="' + fr(c.heures) + ' h de travail perso"><div class="bar" style="height:' + Math.max(2, (c.heures / maxH) * 100) + '%"></div><span class="lbl">' + c.name + (c.ds ? " ⚠️" : "") + "</span></div>";
           }).join("") + "</div></section>";
 
         html += '<section class="card span2" aria-label="Agent Vibe">' +
@@ -543,31 +731,38 @@
           '<div class="auto"><div class="t">🔔 Bilan &amp; planning hebdo</div><p class="d">chaque vendredi · 20h30</p></div>' +
           '<div class="auto"><div class="t">⏰ To-dos du jour</div><p class="d">chaque matin · 7h00</p></div>' +
           '<div class="skills">' + ["planificateur", "suivi-scolaire", "maths", "physique-chimie", "sciences-ingenieur"].map(function (s) { return "<span>" + s + "</span>"; }).join("") + "</div></div>" +
-          '<div><p class="sect">Le site se met à jour tout seul :</p>' +
-          '<div class="cmds">' + ["Planning : en direct depuis Google Calendar", "Compteur DS : recalculé toutes les 30 s", "Synchro calendrier : toutes les 5 min", "DS, notes, objectifs : bloc CONFIG du fichier"].map(function (c) { return "<span>" + c + "</span>"; }).join("") + "</div>" +
+          '<div><p class="sect">Le site vit tout seul :</p>' +
+          '<div class="cmds">' + ["Planning : en direct depuis Google Calendar", "Compteurs DS : recalculés toutes les 30 s", "Synchro calendrier : toutes les 5 min", "Tes révisions cochées restent mémorisées"].map(function (c) { return "<span>" + c + "</span>"; }).join("") + "</div>" +
           '<p class="sect" style="margin-top:16px">🔗 Système</p><div class="sys">' +
           "<span><b>Notion</b> — base de suivi</span><span><b>Google Calendar</b> — horaires</span><span><b>Notion Calendar</b> — interface</span></div>" +
-          '<p style="font-size:12px;color:var(--sub);margin-top:12px">Ce site lit directement ton agenda : chaque créneau ajouté, déplacé ou supprimé dans Google Calendar apparaît ici en quelques minutes, sans rien faire.</p></div></div></section>';
+          '<p style="font-size:12px;color:var(--sub);margin-top:12px">Chaque créneau ajouté, déplacé ou supprimé dans ton agenda apparaît ici en quelques minutes — sans rien faire.</p></div></div></section>';
 
         app.innerHTML = html;
         var newChip = document.querySelector(".chips");
-        if (newChip) newChip.scrollLeft = chipScroll;
+        if (newChip) {
+          if (scrollChip) {
+            var onBtn = newChip.querySelector("button.on");
+            if (onBtn) newChip.scrollLeft = onBtn.offsetLeft - newChip.clientWidth / 2 + onBtn.clientWidth / 2;
+            scrollChip = false;
+          } else newChip.scrollLeft = chipScroll;
+        }
 
         if (!animated) {
           animated = true;
           setTimeout(function () {
-            [["ringR", 78, 1], ["ringB", 62, planifie / RING.objectif], ["ringG", 46, RING.fait / RING.objectif]].forEach(function (rg) {
+            [["ringR", 78, 1], ["ringB", 62, planifie / RING.objectif], ["ringG", 46, accompli / RING.objectif]].forEach(function (rg) {
               var el = document.getElementById(rg[0]);
               if (el) el.setAttribute("stroke-dashoffset", String(2 * Math.PI * rg[1] * (1 - Math.min(1, rg[2]))));
             });
             document.querySelectorAll(".pbar > div").forEach(function (b) { b.style.width = b.getAttribute("data-w") + "%"; });
+            renderFocus();
           }, 80);
         }
       }
 
       /* ---------- Thème ---------- */
       var themeMode = "auto";
-      try { themeMode = localStorage.getItem("dogukan-dash-theme") || "auto"; } catch (e) {}
+      try { themeMode = sget("dogukan-dash-theme") || "auto"; } catch (e) {}
       function applyTheme() {
         var dark = themeMode === "dark" || (themeMode === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
         document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
@@ -585,26 +780,42 @@
         var b = e.target.closest("button[data-mode]");
         if (!b) return;
         themeMode = b.getAttribute("data-mode");
-        try { localStorage.setItem("dogukan-dash-theme", themeMode); } catch (err) {}
+        try { sset("dogukan-dash-theme", themeMode); } catch (err) {}
         renderSeg(); applyTheme();
       });
       window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () { if (themeMode === "auto") applyTheme(); });
 
-      /* ---------- Interactions & minuteurs ---------- */
+      /* ---------- Interactions ---------- */
       document.getElementById("app").addEventListener("click", function (e) {
-        var b = e.target.closest("button[data-day]");
-        if (!b) return;
-        selectedDay = b.getAttribute("data-day");
-        render();
+        var chk = e.target.closest("button.chk");
+        if (chk) {
+          var ev = EVREG[+chk.getAttribute("data-i")];
+          if (!ev) return;
+          var key = evKey(ev), c = loadChecks();
+          if (c[key]) { delete c[key]; saveChecks(c); toast("Session décochée"); }
+          else {
+            var min = Math.max(1, Math.round((ev.end - ev.start) / 60000));
+            c[key] = { d: dkey(ev.start), min: min, ts: Date.now() };
+            saveChecks(c); confetti(); toast("✔ " + min + " min validées — continue !");
+          }
+          render(); return;
+        }
+        var fb = e.target.closest("button.fbtn[data-m]");
+        if (fb) { focusSet(+fb.getAttribute("data-m")); return; }
+        if (e.target.closest("#focusGo")) { focusToggle(); return; }
+        if (e.target.closest("#focusStop")) { focusReset(); return; }
+        var dayBtn = e.target.closest("[data-day]");
+        if (dayBtn) { selectedDay = dayBtn.getAttribute("data-day"); scrollChip = true; render(); return; }
       });
       document.getElementById("refreshbtn").addEventListener("click", function () { sync(); });
 
+      /* ---------- Démarrage & minuteurs ---------- */
       renderSeg();
       applyTheme();
       render();
       sync();
-      setInterval(render, 30000);                       // compteurs en temps réel
-      setInterval(function () { sync(); }, SYNC_EVERY_MS); // données toutes les 5 min
+      setInterval(render, 30000);
+      setInterval(function () { sync(); }, SYNC_EVERY_MS);
       document.addEventListener("visibilitychange", function () {
         if (!document.hidden && Date.now() - (state.lastSync ? state.lastSync.getTime() : 0) > SYNC_EVERY_MS) sync();
       });
