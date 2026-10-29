@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="theme-color" content="#F2F2F7" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📅</text></svg>" />
+    <title>Dashboard Dogukan</title>
+    <style>
+      :root {
+        --bg: #f2f2f7; --card: #ffffff; --border: rgba(60,60,67,0.10); --text: #1c1c1e; --sub: #6e6e73;
+        --chip: #efeff4; --chipborder: rgba(60,60,67,0.08); --blue: #007aff; --green: #34c759; --orange: #ff9500;
+        --red: #ff3b30; --purple: #af52de; --teal: #00a3bf; --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 14px rgba(0,0,0,0.04);
+        --segactive: #ffffff; --focus: #0a84ff;
+      }
+      html[data-theme="dark"] {
+        --bg: #000000; --card: #1c1c1e; --border: rgba(255,255,255,0.10); --text: #f5f5f7; --sub: #98989f;
+        --chip: #2c2c2e; --chipborder: rgba(255,255,255,0.08); --blue: #0a84ff; --green: #30d158; --orange: #ff9f0a;
+        --red: #ff453a; --purple: #bf5af2; --teal: #40c8e0; --shadow: 0 1px 3px rgba(0,0,0,0.5);
+        --segactive: #3a3a3c;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+      .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px 40px; }
+      h1 { font-size: 30px; margin: 0; letter-spacing: -0.5px; }
+      h2 { font-size: 15px; margin: 0; }
+      p { margin: 0; }
+      .tnum { font-variant-numeric: tabular-nums; }
+      header.top { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+      .sub { color: var(--sub); font-size: 14px; margin-top: 4px; }
+      .topright { display: flex; align-items: center; gap: 8px; }
+      .updated { display: inline-flex; align-items: center; gap: 6px; background: var(--chip); color: var(--sub); border-radius: 999px; padding: 7px 12px; font-size: 11px; font-weight: 600; }
+      .seg { display: flex; background: var(--chip); border-radius: 999px; padding: 3px; }
+      .seg button { appearance: none; border: 0; background: transparent; color: var(--sub); font: inherit; font-size: 12px; font-weight: 600; min-height: 36px; padding: 0 12px; border-radius: 999px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+      .seg button[aria-checked="true"] { background: var(--segactive); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
+      html[data-theme="dark"] .seg button[aria-checked="true"] { box-shadow: none; }
+      .grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
+      @media (min-width: 640px) { .grid { grid-template-columns: repeat(2, 1fr); } .span2 { grid-column: span 2; } }
+      @media (min-width: 1000px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+      .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; box-shadow: var(--shadow); }
+      .card.hero { background: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 55%, #af52de 100%); border: none; color: #fff; }
+      .card.hero .sub, .card.hero .kicker { color: rgba(255,255,255,0.85); }
+      .kicker { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.85); display: flex; align-items: center; gap: 8px; }
+      .head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+      .head .l { display: flex; align-items: center; gap: 12px; }
+      .ico { width: 36px; height: 36px; border-radius: 12px; background: var(--chip); display: inline-flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+      .head .sub { font-size: 12px; margin-top: 1px; }
+      .pill { display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; padding: 4px 10px; font-size: 11px; font-weight: 600; background: var(--chip); color: var(--sub); white-space: nowrap; }
+      .pill.b { background: rgba(0,122,255,0.10); color: var(--blue); }
+      .pill.g { background: rgba(52,199,89,0.12); color: var(--green); }
+      .pill.o { background: rgba(255,149,0,0.12); color: var(--orange); }
+      .pill.r { background: rgba(255,59,48,0.10); color: var(--red); }
+      .pill.p { background: rgba(175,82,222,0.10); color: var(--purple); }
+      .big { font-size: 52px; font-weight: 700; line-height: 1; }
+      .legend { margin-top: 12px; font-size: 13px; display: grid; gap: 6px; }
+      .legend .row { display: flex; align-items: center; justify-content: space-between; }
+      .legend .lbl { display: flex; align-items: center; gap: 8px; color: var(--sub); }
+      .dot { width: 10px; height: 10px; border-radius: 999px; display: inline-block; }
+      .ev { display: flex; gap: 12px; align-items: flex-start; padding: 8px; border-radius: 12px; }
+      .ev.past { opacity: 0.45; }
+      .ev.hl { background: rgba(175,82,222,0.06); }
+      .ev.hl.k-cours { background: rgba(0,122,255,0.06); }
+      .ev.hl.k-sport { background: rgba(52,199,89,0.06); }
+      .ev.hl.k-ds { background: rgba(255,59,48,0.06); }
+      .ev.hl.k-travail { background: rgba(0,163,191,0.06); }
+      .ev .time { width: 76px; flex-shrink: 0; text-align: right; font-size: 13px; font-weight: 600; padding-top: 2px; }
+      .ev .time small { font-size: 10px; font-weight: 400; color: var(--sub); }
+      .ev .st { width: 8px; height: 8px; border-radius: 999px; margin-top: 8px; flex-shrink: 0; background: var(--kc); }
+      .k-cours { --kc: var(--blue); } .k-revision { --kc: var(--purple); } .k-travail { --kc: var(--teal); }
+      .k-sport { --kc: var(--green); } .k-ds { --kc: var(--red); }
+      .ev .t { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; line-height: 1.3; }
+      .ev .t .obj { font-size: 12px; font-weight: 400; color: var(--sub); margin-top: 2px; }
+      .ev .titleline { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+      .chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px; scrollbar-width: none; }
+      .chips::-webkit-scrollbar { display: none; }
+      .chips button { appearance: none; border: 1px solid var(--chipborder); background: var(--chip); color: var(--text); font: inherit; font-size: 12px; font-weight: 600; min-height: 44px; min-width: 64px; border-radius: 16px; padding: 0 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0; }
+      .chips button.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+      .chips .cdots { display: flex; gap: 4px; }
+      .timeline { max-height: 340px; overflow-y: auto; }
+      .note { font-size: 11px; color: var(--sub); margin-top: 12px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+      .note .lbl { display: flex; align-items: center; gap: 4px; }
+      .dl { margin-bottom: 16px; }
+      .dl:last-child { margin-bottom: 0; }
+      .dl .topline { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 14px; font-weight: 600; }
+      .dl .topline .n { display: flex; align-items: center; gap: 8px; }
+      .dl .when { font-size: 12px; color: var(--sub); margin-top: 2px; }
+      .pbar { height: 6px; background: var(--chip); border-radius: 999px; overflow: hidden; flex: 1; }
+      .pbar > div { height: 100%; background: var(--red); border-radius: 999px; transition: width 1s cubic-bezier(0.33,1,0.68,1); }
+      .prow { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+      .prow .ct { font-size: 11px; font-weight: 600; color: var(--sub); white-space: nowrap; }
+      .rowline { display: flex; align-items: center; justify-content: space-between; font-size: 14px; }
+      .rowline .r { font-size: 12px; color: var(--sub); text-align: right; }
+      .box { background: var(--chip); border-radius: 12px; padding: 10px 12px; }
+      .box.warn { background: rgba(255,149,0,0.08); border: 1px solid rgba(255,149,0,0.2); }
+      .goal { background: var(--chip); border-radius: 12px; padding: 8px 12px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; margin-top: 10px; }
+      .bignum { font-size: 40px; font-weight: 700; line-height: 1; }
+      .bignum small { font-size: 20px; font-weight: 600; color: var(--sub); }
+      .chart { display: flex; align-items: flex-end; gap: 6px; height: 180px; padding: 4px 0 0; }
+      .chart .col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; gap: 4px; }
+      .chart .bar { width: 100%; max-width: 30px; background: var(--blue); border-radius: 6px 6px 4px 4px; }
+      .chart .lbl { font-size: 9px; color: var(--sub); white-space: nowrap; }
+      .agent { display: grid; gap: 16px; }
+      @media (min-width: 640px) { .agent { grid-template-columns: 1fr 1fr; } }
+      .auto { background: var(--chip); border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; }
+      .auto .t { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+      .auto .d { font-size: 12px; color: var(--sub); margin-top: 2px; }
+      .skills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+      .skills span { background: rgba(175,82,222,0.08); color: var(--purple); border-radius: 999px; padding: 4px 10px; font-size: 11px; font-weight: 600; }
+      .cmds { display: flex; flex-wrap: wrap; gap: 8px; }
+      .cmds span { border: 1px solid var(--chipborder); background: var(--chip); color: var(--text); border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 500; }
+      .sys { display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; }
+      .sys span { background: var(--chip); border-radius: 12px; padding: 6px 12px; }
+      .sys b { font-weight: 600; }
+      .sect { font-size: 13px; font-weight: 600; margin: 4px 0 8px; display: flex; align-items: center; gap: 6px; }
+      .foot { text-align: center; font-size: 11px; color: var(--sub); margin-top: 32px; }
+      .banner { background: rgba(255,149,0,0.1); border: 1px solid rgba(255,149,0,0.25); color: var(--orange); border-radius: 16px; padding: 12px 16px; font-size: 14px; font-weight: 600; margin-bottom: 16px; }
+      button:focus-visible, a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+      @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="top">
+        <div>
+          <h1>Salut, Dogukan 👋</h1>
+          <p class="sub">Mercredi 28 octobre · Vacances de la Toussaint — reprise lundi 2 nov.</p>
+        </div>
+        <div class="topright">
+          <span class="updated" title="Date de la dernière synchronisation par ton agent">🔄 <span id="updated"></span></span>
+          <div class="seg" role="radiogroup" aria-label="Thème du dashboard" id="themeseg"></div>
+        </div>
+      </header>
+      <div id="banner"></div>
+      <main class="grid" id="app" aria-label="Tableau de bord"></main>
+      <p class="foot">Système personnel Dogukan · Notion + Google Calendar + Notion Calendar · Mis à jour le <span id="updated2"></span> · Hébergé gratuitement sur GitHub Pages</p>
+    </div>
+
+    <script>
+      /* ============ SNAPSHOT — 28 oct. 2026, 22h35 ============ */
+      var UPDATED = "28 oct. 2026 · 22h35";
+      var SNAPSHOT_END = new Date("2026-11-08T23:59:00+01:00");
+
+      var DAYS = [
+        { date: "2026-10-29", short: "Jeu 29", long: "Jeudi 29 octobre", events: [
+          { start: "09:30", end: "11:00", title: "Révision SI #1", kind: "revision", obj: "Schéma-blocs : chaîne d'énergie + d'information · 2 exercices de modélisation" },
+          { start: "13:30", end: "14:30", title: "Histoire-Géo & EMC", kind: "revision", obj: "Fiche EMC + relecture active HG" },
+          { start: "15:00", end: "16:00", title: "Révision PC #2", kind: "revision", obj: "1 exercice type DS complet — unités et analyse dimensionnelle" }
+        ]},
+        { date: "2026-10-30", short: "Ven 30", long: "Vendredi 30 octobre", events: [
+          { start: "09:30", end: "10:30", title: "Révision ES #2", kind: "revision", obj: "Fiches actives + 1 exercice de synthèse" },
+          { start: "11:00", end: "12:00", title: "Maths", kind: "revision", obj: "Exercices du chapitre en cours" },
+          { start: "14:00", end: "15:00", title: "Révision SI #2", kind: "revision", obj: "Exercices type DS SI" },
+          { start: "18:00", end: "20:00", title: "🏐 Volleyball", kind: "sport", obj: "Entraînement fixe" }
+        ]},
+        { date: "2026-10-31", short: "Sam 31", long: "Samedi 31 octobre", events: [
+          { start: "09:30", end: "10:30", title: "Révision PC #3", kind: "revision", obj: "Exercice type DS en conditions chrono" },
+          { start: "14:00", end: "14:30", title: "Relecture fiches ES", kind: "revision", obj: "Consolidation" },
+          { start: "15:00", end: "16:30", title: "Français & Latin", kind: "revision", obj: "Travail courant" }
+        ]},
+        { date: "2026-11-01", short: "Dim 1ᵉʳ", long: "Dimanche 1ᵉʳ novembre", events: [
+          { start: "09:30", end: "10:30", title: "Révision SI #3", kind: "revision", obj: "1 exercice complet type DS, sans aide" },
+          { start: "10:45", end: "11:15", title: "Relecture légère PC + ES", kind: "revision", obj: "Dernier passage avant la reprise" }
+        ]},
+        { date: "2026-11-02", short: "Lun 2", long: "Lundi 2 novembre — reprise (Q2)", events: [
+          { start: "08:00", end: "09:00", title: "Anglais LV1", kind: "cours" },
+          { start: "13:00", end: "14:00", title: "EMC", kind: "cours" },
+          { start: "14:00", end: "16:00", title: "Mathématiques", kind: "cours" },
+          { start: "16:00", end: "17:00", title: "Espagnol LV2", kind: "cours" },
+          { start: "17:00", end: "18:00", title: "Espagnol LV2", kind: "cours" },
+          { start: "19:30", end: "20:15", title: "Relecture veille de DS — PC + ES", kind: "revision", obj: "Fiches seulement, pas d'exercice : dormir tôt" }
+        ]},
+        { date: "2026-11-03", short: "Mar 3", long: "Mardi 3 novembre — ⚠️ 2 DS", events: [
+          { start: "08:00", end: "10:00", title: "⚠️ DS Physique-Chimie + DS Enseignement scientifique", kind: "ds", obj: "Journée DS — fraîcheur avant tout" },
+          { start: "08:00", end: "10:00", title: "Enseignement scientifique", kind: "cours" },
+          { start: "10:00", end: "12:00", title: "Mathématiques", kind: "cours" },
+          { start: "13:00", end: "14:00", title: "LCA Latin", kind: "cours" },
+          { start: "14:00", end: "16:00", title: "Physique-Chimie", kind: "cours" },
+          { start: "17:00", end: "18:00", title: "Français", kind: "cours" },
+          { start: "18:00", end: "20:00", title: "🏐 Volleyball", kind: "sport" },
+          { start: "20:45", end: "21:30", title: "Fiches SI", kind: "revision", obj: "Préparer le DS SI de jeudi" }
+        ]},
+        { date: "2026-11-04", short: "Mer 4", long: "Mercredi 4 novembre", events: [
+          { start: "09:00", end: "10:00", title: "Anglais LV1", kind: "cours" },
+          { start: "10:00", end: "12:00", title: "EPS", kind: "cours" },
+          { start: "13:30", end: "15:30", title: "Révision SI — DS demain", kind: "revision", obj: "Exercices complets type DS" },
+          { start: "15:45", end: "17:15", title: "Maths", kind: "revision", obj: "Exercices du chapitre en cours" },
+          { start: "18:30", end: "20:00", title: "🥋 Karaté", kind: "sport" },
+          { start: "20:45", end: "21:15", title: "Révision légère SI", kind: "revision", obj: "Veille de DS : fiches seulement" }
+        ]},
+        { date: "2026-11-05", short: "Jeu 5", long: "Jeudi 5 novembre — ⚠️ DS SI", events: [
+          { start: "08:00", end: "09:00", title: "LCA Latin", kind: "cours" },
+          { start: "10:00", end: "12:00", title: "⚠️ DS Sciences de l'Ingénieur", kind: "ds" },
+          { start: "13:00", end: "14:00", title: "Histoire-Géographie", kind: "cours" },
+          { start: "15:00", end: "16:00", title: "Travail perso au lycée", kind: "travail" }
+        ]},
+        { date: "2026-11-06", short: "Ven 6", long: "Vendredi 6 novembre", events: [
+          { start: "08:00", end: "10:00", title: "Sciences de l'Ingénieur", kind: "cours" },
+          { start: "10:00", end: "12:00", title: "Physique-Chimie", kind: "cours" },
+          { start: "13:00", end: "15:00", title: "Histoire-Géographie", kind: "cours" },
+          { start: "15:00", end: "16:00", title: "Travail au lycée", kind: "travail" },
+          { start: "16:00", end: "17:00", title: "Vie de classe", kind: "cours" },
+          { start: "18:00", end: "20:00", title: "🏐 Volleyball", kind: "sport" }
+        ]},
+        { date: "2026-11-07", short: "Sam 7", long: "Samedi 7 novembre — match", events: [
+          { start: "09:00", end: "10:30", title: "Révision Maths", kind: "revision", obj: "Départ au match juste après" },
+          { start: "11:00", end: "16:30", title: "🏅 Match de volley", kind: "sport", obj: "11h · retour ~16h30 · repos au retour (hors agenda, sur demande)" }
+        ]},
+        { date: "2026-11-08", short: "Dim 8", long: "Dimanche 8 novembre", events: [
+          { start: "09:30", end: "11:30", title: "PC & Histoire-Géo + prépa semaine", kind: "revision" },
+          { start: "14:00", end: "15:30", title: "Maths — suite", kind: "revision", obj: "Récupère la séance raccourcie de samedi" },
+          { start: "15:45", end: "17:00", title: "Anglais & Espagnol", kind: "revision" }
+        ]}
+      ];
+
+      var DEADLINES = [
+        { subject: "Physique-Chimie", when: "mardi 3 nov. · matin", at: "2026-11-03T08:00:00+01:00", icon: "🧪", done: 1, total: 3 },
+        { subject: "Enseignement scientifique", when: "mardi 3 nov. · matin", at: "2026-11-03T08:00:00+01:00", icon: "🔬", done: 1, total: 2 },
+        { subject: "Sciences de l'Ingénieur", when: "jeudi 5 nov. · 10h", at: "2026-11-05T10:00:00+01:00", icon: "⚙️", done: 0, total: 3 }
+      ];
+
+      var RING = { fait: 3, planifie: 14, objectif: 20 };
+
+      /* ============ Helpers ============ */
+      function mins(s) { return parseInt(s.slice(0, 2), 10) * 60 + parseInt(s.slice(3), 10); }
+      function durH(e) { return (mins(e.end) - mins(e.start)) / 60; }
+      function fmtT(s) { return s.replace(":", "h"); }
+      function evDate(d, t) { return new Date(d + "T" + t + ":00+01:00"); }
+      function dateKey(d) {
+        return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+      }
+      function fr(n) { return String(n).replace(".", ","); }
+      function countdown(now, target) {
+        var ms = target.getTime() - now.getTime();
+        if (ms <= 0) return { past: true, d: 0, h: 0, m: 0 };
+        return { past: false, d: Math.floor(ms / 86400000), h: Math.floor((ms % 86400000) / 3600000), m: Math.floor((ms % 3600000) / 60000) };
+      }
+      function pad(n) { return String(n).padStart(2, "0"); }
+
+      /* ============ État ============ */
+      var selectedDay = null;
+      var animated = false;
+
+      /* ============ Thème ============ */
+      var themeMode = "auto";
+      try { themeMode = localStorage.getItem("dogukan-dash-theme") || "auto"; } catch (e) {}
+      function applyTheme() {
+        var dark = themeMode === "dark" || (themeMode === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute("content", dark ? "#000000" : "#F2F2F7");
+      }
+      function renderSeg() {
+        var seg = document.getElementById("themeseg");
+        var opts = [ ["auto", "↻", "Auto"], ["light", "☀️", "Clair"], ["dark", "🌙", "Sombre"] ];
+        seg.innerHTML = opts.map(function (o) {
+          return '<button type="button" role="radio" aria-checked="' + (themeMode === o[0]) + '" data-mode="' + o[0] + '" aria-label="Thème ' + o[2].toLowerCase() + '">' + o[1] + " " + o[2] + "</button>";
+        }).join("");
+      }
+      document.getElementById("themeseg").addEventListener("click", function (e) {
+        var b = e.target.closest("button[data-mode]");
+        if (!b) return;
+        themeMode = b.getAttribute("data-mode");
+        try { localStorage.setItem("dogukan-dash-theme", themeMode); } catch (err) {}
+        renderSeg();
+        applyTheme();
+      });
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () { if (themeMode === "auto") applyTheme(); });
+
+      /* ============ Rendu ============ */
+      function evRow(ev, past, hl, dayDate, now) {
+        var startD = evDate(dayDate, ev.start), endD = evDate(dayDate, ev.end);
+        var c = countdown(now, startD);
+        var running = startD <= now && now < endD;
+        var badge = "";
+        if (past) badge = '<span aria-label="Terminé" style="color:var(--green)">✔</span>';
+        else if (running) badge = '<span class="pill" style="background:color-mix(in srgb, var(--' + (ev.kind === "revision" ? "purple" : ev.kind === "cours" ? "blue" : ev.kind === "sport" ? "green" : ev.kind === "travail" ? "teal" : "red") + ') 10%, transparent); color:var(--' + (ev.kind === "revision" ? "purple" : ev.kind === "cours" ? "blue" : ev.kind === "sport" ? "green" : ev.kind === "travail" ? "teal" : "red") + ')">En cours</span>';
+        else if (hl && !c.past) badge = '<span class="pill" style="color:var(--kc)">' + (c.d > 0 ? "J–" + c.d : "dans " + c.h + "h" + pad(c.m)) + "</span>";
+        return '<div class="ev k-' + ev.kind + (past ? " past" : "") + (hl ? " hl" : "") + '">' +
+          '<div class="time tnum">' + fmtT(ev.start) + ' <small>– ' + fmtT(ev.end) + "</small></div>" +
+          '<div class="st" aria-hidden="true"></div>' +
+          '<div style="flex:1;min-width:0"><div class="titleline"><span class="t">' + ev.title + "</span>" + badge + "</div>" +
+          (ev.obj ? '<p class="obj" style="font-size:12px;color:var(--sub);margin:2px 0 0">' + ev.obj + "</p>" : "") +
+          "</div></div>";
+      }
+
+      function ringSvg(id, r, pct, color, animate) {
+        var c = 2 * Math.PI * r;
+        return '<circle id="' + id + '" cx="100" cy="100" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="12" stroke-linecap="round" stroke-dasharray="' + c + '" stroke-dashoffset="' + (c * (1 - (animate ? 0 : pct))) + '" style="transition: stroke-dashoffset 1.2s cubic-bezier(0.33,1,0.68,1)"/>';
+      }
+
+      function render() {
+        var now = new Date();
+        var todayK = dateKey(now);
+        var app = document.getElementById("app");
+        var chipScroll = 0;
+        var chipEl = document.querySelector(".chips");
+        if (chipEl) chipScroll = chipEl.scrollLeft;
+
+        /* Données dynamiques */
+        var upcoming = null;
+        for (var i = 0; i < DAYS.length; i++) {
+          var evs = DAYS[i].events.filter(function (e) { return evDate(DAYS[i].date, e.end) > now; });
+          if (evs.length) { upcoming = { day: DAYS[i], events: evs, isToday: DAYS[i].date === todayK }; break; }
+        }
+        var day = DAYS.find(function (d) { return d.date === (selectedDay || (upcoming ? upcoming.day.date : DAYS[0].date)); }) || DAYS[0];
+        var dayIsToday = day.date === todayK;
+
+        var upDl = DEADLINES.filter(function (dl) { return !countdown(now, new Date(dl.at)).past; });
+        var hero = upDl[0] || DEADLINES[DEADLINES.length - 1];
+        var heroC = countdown(now, new Date(hero.at));
+        var heroTitle = upDl.filter(function (dl) { return dl.at === hero.at; }).map(function (dl) { return dl.subject; }).join(" + ");
+        var nextDl = upDl.find(function (dl) { return dl.at !== hero.at; });
+        var nextC = nextDl ? countdown(now, new Date(nextDl.at)) : null;
+
+        var charge = DAYS.map(function (d) {
+          return { name: d.short, heures: Math.round(d.events.filter(function (e) { return e.kind === "revision" || e.kind === "travail"; }).reduce(function (s, e) { return s + durH(e); }, 0) * 4) / 4, ds: d.events.some(function (e) { return e.kind === "ds"; }) };
+        });
+        var totalVac = charge.slice(0, 4).reduce(function (s, c) { return s + c.heures; }, 0);
+        var totalDs = charge.slice(4).reduce(function (s, c) { return s + c.heures; }, 0);
+        var maxH = Math.max.apply(null, charge.map(function (c) { return c.heures; }));
+
+        var nextFirst = upcoming ? upcoming.events[0] : null;
+        var ncd = nextFirst ? countdown(now, evDate(upcoming.day.date, nextFirst.start)) : null;
+        var expired = now > SNAPSHOT_END;
+
+        document.getElementById("banner").innerHTML = expired
+          ? '<div class="banner" role="alert">⚠️ Ce snapshot date du 28 octobre — ouvre Vibe et demande « mets à jour mon dashboard » : le site sera republié en quelques minutes.</div>'
+          : "";
+
+        var html = "";
+
+        /* Hero DS */
+        html += '<section class="card hero" aria-label="Prochain devoir surveillé">' +
+          '<div class="kicker">⏳ Prochain devoir surveillé</div>' +
+          '<p style="font-size:22px;font-weight:700;margin:12px 0 0;line-height:1.15">' + (heroTitle || hero.subject) + "</p>" +
+          '<p class="sub" style="margin:4px 0 0;font-size:14px">' + hero.when + "</p>" +
+          '<div class="tnum" style="display:flex;align-items:flex-end;gap:8px;margin:20px 0 0" aria-live="polite">' +
+          (heroC.past
+            ? '<span style="font-size:32px;font-weight:700">Terminé 🎉</span>'
+            : '<span class="big tnum">J–' + heroC.d + '</span><span class="tnum" style="font-size:18px;font-weight:600;padding-bottom:4px;opacity:.9">' + heroC.h + "h" + pad(heroC.m) + "</span>") +
+          "</div>" +
+          '<div style="background:rgba(255,255,255,0.16);border-radius:12px;padding:10px 12px;font-size:13px;font-weight:500;margin-top:16px">' +
+          (nextDl && nextC
+            ? "Puis DS " + nextDl.subject + " — " + nextDl.when + ' · <b class="tnum">' + (nextC.past ? "terminé" : "J–" + nextC.d) + "</b>"
+            : "Tous les DS de ce snapshot sont passés 🎉") +
+          "</div></section>";
+
+        /* Anneaux */
+        html += '<section class="card" aria-label="Progression du travail perso">' +
+          '<div class="head"><div class="l"><span class="ico" style="background:rgba(255,59,48,0.1)">📊</span><div><h2>Travail perso — semaine du 26 oct.</h2><p class="sub">Anneaux : accompli · planifié · objectif</p></div></div></div>' +
+          '<div style="display:flex;justify-content:center"><svg viewBox="0 0 200 200" width="170" height="170" role="img" aria-label="Accompli ' + RING.fait + " heures sur un objectif de " + RING.objectif + " heures, " + RING.planifie + ' heures planifiées">' +
+          '<g transform="rotate(-90 100 100)">' +
+          '<circle cx="100" cy="100" r="78" fill="none" stroke="var(--chip)" stroke-width="12"/>' + ringSvg("ringR", 78, 1, "var(--red)", animated) +
+          '<circle cx="100" cy="100" r="62" fill="none" stroke="var(--chip)" stroke-width="12"/>' + ringSvg("ringB", 62, RING.planifie / RING.objectif, "var(--blue)", animated) +
+          '<circle cx="100" cy="100" r="46" fill="none" stroke="var(--chip)" stroke-width="12"/>' + ringSvg("ringG", 46, RING.fait / RING.objectif, "var(--green)", animated) +
+          "</g>" +
+          '<text x="100" y="96" text-anchor="middle" font-size="30" font-weight="700" fill="var(--text)">' + RING.planifie + 'h</text>' +
+          '<text x="100" y="116" text-anchor="middle" font-size="11" fill="var(--sub)">planifiées</text>' +
+          "</svg></div>" +
+          '<div class="legend">' +
+          [["var(--green)", "Accompli (au 28 oct. soir)", RING.fait + "h"], ["var(--blue)", "Planifié cette semaine", RING.planifie + "h"], ["var(--red)", "Objectif max / semaine", RING.objectif + "h"]].map(function (r) {
+            return '<div class="row"><span class="lbl"><span class="dot" style="background:' + r[0] + '"></span>' + r[1] + '</span><b class="tnum">' + r[2] + "</b></div>";
+          }).join("") +
+          "</div>" +
+          '<p style="font-size:12px;color:var(--sub);margin-top:12px">Semaine des DS (2–8 nov.) : ' + fr(totalDs) + "h — allégée volontairement, la fraîcheur prime le volume.</p></section>";
+
+        /* Prochaine journée */
+        html += '<section class="card" aria-label="Prochaine journée">' +
+          '<div class="head"><div class="l"><span class="ico" style="background:rgba(0,122,255,0.1)">🔔</span><div><h2>' +
+          (upcoming ? (upcoming.isToday ? "Aujourd'hui — à venir" : upcoming.day.long) : "Planning terminé") + "</h2><p class='sub'>" +
+          (upcoming ? upcoming.events.length + " créneau" + (upcoming.events.length > 1 ? "x" : "") + " à venir" + (ncd && !ncd.past ? " · prochain " + (ncd.d > 0 ? "J–" + ncd.d : "dans " + ncd.h + "h" + pad(ncd.m)) : "") : "—") +
+          "</p></div></div></div>";
+        if (upcoming) {
+          html += upcoming.events.slice(0, 5).map(function (ev) { return evRow(ev, false, ev === nextFirst, upcoming.day.date, now); }).join("");
+          if (upcoming.events.length > 5) html += '<p style="font-size:12px;font-weight:600;color:var(--sub);padding:4px 8px 0">+ ' + (upcoming.events.length - 5) + " autres créneaux — voir le planning ↓</p>";
+        } else {
+          html += '<p style="font-size:14px;color:var(--sub)">Aucun créneau à venir dans ce snapshot — demande une mise à jour.</p>';
+        }
+        html += "</section>";
+
+        /* Planning */
+        html += '<section class="card span2" aria-label="Planning">' +
+          '<div class="head"><div class="l"><span class="ico" style="background:rgba(175,82,222,0.1)">🎯</span><div><h2>Planning — 29 oct. → 8 nov.</h2><p class="sub">' + day.long + '</p></div></div><span class="pill p">' + day.events.length + " créneaux</span></div>" +
+          '<div class="chips" role="tablist" aria-label="Choisir un jour">' +
+          DAYS.map(function (d) {
+            var hasDs = d.events.some(function (e) { return e.kind === "ds"; });
+            var hasSp = d.events.some(function (e) { return e.kind === "sport"; });
+            return '<button type="button" role="tab" aria-selected="' + (d.date === day.date) + '" data-day="' + d.date + '" aria-label="' + d.long + '">' + d.short +
+              '<span class="cdots">' + (hasDs ? '<span class="dot" style="width:6px;height:6px;background:' + (d.date === day.date ? "#fff" : "var(--red)") + '"></span>' : "") +
+              (hasSp ? '<span class="dot" style="width:6px;height:6px;background:' + (d.date === day.date ? "#fff" : "var(--green)") + '"></span>' : "") + "</span></button>";
+          }).join("") + "</div>" +
+          '<div class="timeline">' + day.events.map(function (ev) {
+            return evRow(ev, dayIsToday && evDate(day.date, ev.end) <= now, false, day.date, now);
+          }).join("") + "</div>" +
+          '<p class="note"><span class="lbl"><span class="dot" style="width:6px;height:6px;background:var(--red)"></span> DS</span><span class="lbl"><span class="dot" style="width:6px;height:6px;background:var(--green)"></span> Sport</span>Règles : rien après 21h30 · sport intouchable · max 2 matières en révision</p></section>';
+
+        /* Échéances */
+        html += '<section class="card" aria-label="Échéances">' +
+          '<div class="head"><div class="l"><span class="ico" style="background:rgba(255,59,48,0.1)">🎯</span><div><h2>Échéances</h2><p class="sub">Base Notion « Échéances »</p></div></div></div>';
+        DEADLINES.forEach(function (dl) {
+          var c = countdown(now, new Date(dl.at));
+          var pct = Math.round((dl.done / dl.total) * 100);
+          html += '<div class="dl"><div class="topline"><span class="n">' + dl.icon + " " + dl.subject + '</span><span class="pill ' + (c.past ? "g" : "o") + '">' + (c.past ? "Terminé" : "J–" + c.d) + '</span></div>' +
+            '<p class="when">' + dl.when + " · Préparation en cours</p>" +
+            '<div class="prow"><div class="pbar"><div data-w="' + pct + '" style="width:' + (animated ? pct : 0) + '%"></div></div><span class="ct tnum">' + dl.done + "/" + dl.total + " révisions</span></div></div>";
+        });
+        html += '<div class="box rowline"><span style="font-size:13px;font-weight:600">🚀 ApprentyHunter</span><span class="pill p">Projet perso</span></div></section>';
+
+        /* Sport */
+        html += '<section class="card" aria-label="Sport">' +
+          '<div class="head"><div class="l"><span class="ico" style="background:rgba(52,199,89,0.12)">❤️</span><div><h2>Sport</h2><p class="sub">Créneaux fixes — intouchables</p></div></div></div>' +
+          '<div class="rowline" style="margin-bottom:10px"><b>🏐 Volleyball</b><span class="r">mardi &amp; vendredi · 18h–20h</span></div>' +
+          '<div class="rowline" style="margin-bottom:10px"><b>🥋 Karaté</b><span class="r">mercredi · 18h30–20h</span></div>' +
+          '<div class="box warn"><div class="rowline"><b>🏅 Match de volley</b><span class="pill o">sam. 7 nov.</span></div><p style="font-size:12px;color:var(--sub);margin-top:4px">11h · retour ~16h30 — séances du samedi déplacées au dimanche.</p></div></section>';
+
+        /* Objectifs */
+        html += '<section class="card" aria-label="Objectifs">' +
+          '<div class="head"><div class="l"><span class="ico" style="background:rgba(0,122,255,0.1)">🚀</span><div><h2>Objectifs</h2><p class="sub">Cap sur 2027–2028</p></div></div></div>' +
+          '<div class="bignum tnum">19+<small>/20</small></div>' +
+          [["🚩", "Prépa MPSI → MP*"], ["🎯", "ISAE-SUPAERO · INSA Toulouse"], ["⏱️", "15–20 h de travail perso / semaine"]].map(function (g) {
+            return '<div class="goal">' + g[0] + " " + g[1] + "</div>";
+          }).join("") + "</section>";
+
+        /* Notes */
+        html += '<section class="card" aria-label="Suivi des notes">' +
+          '<div class="head"><div class="l"><span class="ico" style="background:rgba(0,163,191,0.1)">📚</span><div><h2>Suivi des notes</h2><p class="sub">Base Notion « Notes »</p></div></div></div>' +
+          '<div class="box" style="display:flex;gap:12px;align-items:center"><span style="font-size:28px">📝</span><p style="font-size:13px;color:var(--sub)"><b style="color:var(--text)">Aucune note pour l'instant.</b> Saisis tes notes dans Notion — elles apparaîtront ici à la prochaine mise à jour.</p></div>' +
+          '<p style="font-size:12px;color:var(--sub);margin-top:12px">Objectif : rester au-dessus de 19 de moyenne générale.</p></section>';
+
+        /* Charge */
+        html += '<section class="card" aria-label="Charge de travail">' +
+          '<div class="head"><div class="l"><span class="ico" style="background:rgba(0,122,255,0.1)">📊</span><div><h2>Charge de travail perso</h2><p class="sub">Heures planifiées · 29 oct. → 8 nov.</p></div></div></div>' +
+          '<div class="chart">' + charge.map(function (c) {
+            return '<div class="col"><div class="bar" style="height:' + Math.max(2, (c.heures / maxH) * 100) + '%" title="' + fr(c.heures) + ' h de travail perso"></div><span class="lbl">' + c.name + (c.ds ? " ⚠️" : "") + "</span></div>";
+          }).join("") + "</div>" +
+          '<p style="font-size:12px;color:var(--sub);margin-top:12px">Fin des vacances : ' + fr(totalVac) + "h de révisions · semaine des DS : " + fr(totalDs) + "h, puis remontée vers 15h+ dès le 9 nov.</p></section>";
+
+        /* Agent */
+        html += '<section class="card span2" aria-label="Agent Vibe">' +
+          '<div class="head"><div class="l"><span class="ico" style="background:linear-gradient(135deg,#0a84ff,#af52de);color:#fff">✨</span><div><h2>Ton agent · Vibe</h2><p class="sub">2 automatisations actives</p></div></div><span style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--green)"><span class="dot"></span>En ligne</span></div>' +
+          '<div class="agent"><div>' +
+          '<div class="auto"><div class="t">🔔 Bilan &amp; planning hebdo</div><p class="d">chaque vendredi · 20h30 · prochain : ven. 6 nov.</p></div>' +
+          '<div class="auto"><div class="t">⏰ To-dos du jour</div><p class="d">chaque matin · 7h00 · récap du jour dans la conversation</p></div>' +
+          '<div class="skills">' + ["planificateur", "suivi-scolaire", "maths", "physique-chimie", "sciences-ingenieur"].map(function (s) { return "<span title=\"Skill — à activer dans Vibe\">" + s + "</span>"; }).join("") + "</div></div>" +
+          '<div><p class="sect">Parle-moi simplement :</p><div class="cmds">' +
+          ["« mets à jour mon dashboard »", "« bilan de la semaine »", "« planifie mes révisions de SI »", "« ajoute un DM de maths vendredi »"].map(function (c) { return "<span>" + c + "</span>"; }).join("") +
+          '</div><p class="sect" style="margin-top:16px">🔗 Système</p><div class="sys">' +
+          "<span><b>Notion</b> — base de suivi</span><span><b>Google Calendar</b> — horaires</span><span><b>Notion Calendar</b> — interface</span></div>" +
+          '<p style="font-size:12px;color:var(--sub);margin-top:12px">Snapshot du ' + UPDATED + ". Ce site est mis à jour par ton agent : ouvre Vibe, demande « mets à jour mon dashboard », et le site est republié en quelques minutes.</p></div></div></section>';
+
+        app.innerHTML = html;
+        var newChip = document.querySelector(".chips");
+        if (newChip) newChip.scrollLeft = chipScroll;
+
+        /* Animation des anneaux et barres au premier rendu uniquement */
+        if (!animated) {
+          animated = true;
+          setTimeout(function () {
+            [["ringR", 78, 1], ["ringB", 62, RING.planifie / RING.objectif], ["ringG", 46, RING.fait / RING.objectif]].forEach(function (rg) {
+              var el = document.getElementById(rg[0]);
+              if (el) el.setAttribute("stroke-dashoffset", String(2 * Math.PI * rg[1] * (1 - rg[2])));
+            });
+            document.querySelectorAll(".pbar > div").forEach(function (b) { b.style.width = b.getAttribute("data-w") + "%"; });
+          }, 80);
+        }
+      }
+
+      /* Interaction journaux */
+      document.getElementById("app").addEventListener("click", function (e) {
+        var b = e.target.closest("button[data-day]");
+        if (!b) return;
+        selectedDay = b.getAttribute("data-day");
+        render();
+      });
+
+      document.getElementById("updated").textContent = UPDATED;
+      document.getElementById("updated2").textContent = UPDATED;
+      renderSeg();
+      applyTheme();
+      render();
+      setInterval(render, 30000);
+    </script>
+  </body>
+</html>
