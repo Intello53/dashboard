@@ -1,1027 +1,613 @@
-import React, { useEffect, useMemo, useState } from "react";
-import {
-  IconAlarmClock,
-  IconArrowRotateClockwise,
-  IconBell,
-  IconBolt,
-  IconBook,
-  IconChart,
-  IconCircleCheck,
-  IconFlask,
-  IconGoalFlag,
-  IconHeart2,
-  IconLink,
-  IconMedal,
-  IconMoon,
-  IconRocket,
-  IconSparkle2,
-  IconSunCloud,
-  IconTarget,
-  IconTimer,
-} from "nucleo-sharp";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
-
-/* ================= SNAPSHOT — 28 oct. 2026, 22h35 ================= */
-
-type Kind = "cours" | "revision" | "travail" | "sport" | "ds";
-
-interface Ev {
-  start: string;
-  end: string;
-  title: string;
-  kind: Kind;
-  obj?: string;
-}
-interface Day {
-  date: string;
-  short: string;
-  long: string;
-  events: Ev[];
-}
-
-const UPDATED = "28 oct. 2026 · 22h35";
-const SNAPSHOT_END = new Date("2026-11-08T23:59:00+01:00");
-
-const DAYS: Day[] = [
-  {
-    date: "2026-10-29",
-    short: "Jeu 29",
-    long: "Jeudi 29 octobre",
-    events: [
-      { start: "09:30", end: "11:00", title: "Révision SI #1", kind: "revision", obj: "Schéma-blocs : chaîne d'énergie + d'information · 2 exercices de modélisation" },
-      { start: "13:30", end: "14:30", title: "Histoire-Géo & EMC", kind: "revision", obj: "Fiche EMC + relecture active HG" },
-      { start: "15:00", end: "16:00", title: "Révision PC #2", kind: "revision", obj: "1 exercice type DS complet — unités et analyse dimensionnelle" },
-    ],
-  },
-  {
-    date: "2026-10-30",
-    short: "Ven 30",
-    long: "Vendredi 30 octobre",
-    events: [
-      { start: "09:30", end: "10:30", title: "Révision ES #2", kind: "revision", obj: "Fiches actives + 1 exercice de synthèse" },
-      { start: "11:00", end: "12:00", title: "Maths", kind: "revision", obj: "Exercices du chapitre en cours" },
-      { start: "14:00", end: "15:00", title: "Révision SI #2", kind: "revision", obj: "Exercices type DS SI" },
-      { start: "18:00", end: "20:00", title: "🏐 Volleyball", kind: "sport", obj: "Entraînement fixe" },
-    ],
-  },
-  {
-    date: "2026-10-31",
-    short: "Sam 31",
-    long: "Samedi 31 octobre",
-    events: [
-      { start: "09:30", end: "10:30", title: "Révision PC #3", kind: "revision", obj: "Exercice type DS en conditions chrono" },
-      { start: "14:00", end: "14:30", title: "Relecture fiches ES", kind: "revision", obj: "Consolidation" },
-      { start: "15:00", end: "16:30", title: "Français & Latin", kind: "revision", obj: "Travail courant" },
-    ],
-  },
-  {
-    date: "2026-11-01",
-    short: "Dim 1ᵉʳ",
-    long: "Dimanche 1ᵉʳ novembre",
-    events: [
-      { start: "09:30", end: "10:30", title: "Révision SI #3", kind: "revision", obj: "1 exercice complet type DS, sans aide" },
-      { start: "10:45", end: "11:15", title: "Relecture légère PC + ES", kind: "revision", obj: "Dernier passage avant la reprise" },
-    ],
-  },
-  {
-    date: "2026-11-02",
-    short: "Lun 2",
-    long: "Lundi 2 novembre — reprise (Q2)",
-    events: [
-      { start: "08:00", end: "09:00", title: "Anglais LV1", kind: "cours" },
-      { start: "13:00", end: "14:00", title: "EMC", kind: "cours" },
-      { start: "14:00", end: "16:00", title: "Mathématiques", kind: "cours" },
-      { start: "16:00", end: "17:00", title: "Espagnol LV2", kind: "cours" },
-      { start: "17:00", end: "18:00", title: "Espagnol LV2", kind: "cours" },
-      { start: "19:30", end: "20:15", title: "Relecture veille de DS — PC + ES", kind: "revision", obj: "Fiches seulement, pas d'exercice : dormir tôt" },
-    ],
-  },
-  {
-    date: "2026-11-03",
-    short: "Mar 3",
-    long: "Mardi 3 novembre — ⚠️ 2 DS",
-    events: [
-      { start: "08:00", end: "10:00", title: "⚠️ DS Physique-Chimie + DS Enseignement scientifique", kind: "ds", obj: "Journée DS — fraîcheur avant tout" },
-      { start: "08:00", end: "10:00", title: "Enseignement scientifique", kind: "cours" },
-      { start: "10:00", end: "12:00", title: "Mathématiques", kind: "cours" },
-      { start: "13:00", end: "14:00", title: "LCA Latin", kind: "cours" },
-      { start: "14:00", end: "16:00", title: "Physique-Chimie", kind: "cours" },
-      { start: "17:00", end: "18:00", title: "Français", kind: "cours" },
-      { start: "18:00", end: "20:00", title: "🏐 Volleyball", kind: "sport" },
-      { start: "20:45", end: "21:30", title: "Fiches SI", kind: "revision", obj: "Préparer le DS SI de jeudi" },
-    ],
-  },
-  {
-    date: "2026-11-04",
-    short: "Mer 4",
-    long: "Mercredi 4 novembre",
-    events: [
-      { start: "09:00", end: "10:00", title: "Anglais LV1", kind: "cours" },
-      { start: "10:00", end: "12:00", title: "EPS", kind: "cours" },
-      { start: "13:30", end: "15:30", title: "Révision SI — DS demain", kind: "revision", obj: "Exercices complets type DS" },
-      { start: "15:45", end: "17:15", title: "Maths", kind: "revision", obj: "Exercices du chapitre en cours" },
-      { start: "18:30", end: "20:00", title: "🥋 Karaté", kind: "sport" },
-      { start: "20:45", end: "21:15", title: "Révision légère SI", kind: "revision", obj: "Veille de DS : fiches seulement" },
-    ],
-  },
-  {
-    date: "2026-11-05",
-    short: "Jeu 5",
-    long: "Jeudi 5 novembre — ⚠️ DS SI",
-    events: [
-      { start: "08:00", end: "09:00", title: "LCA Latin", kind: "cours" },
-      { start: "10:00", end: "12:00", title: "⚠️ DS Sciences de l'Ingénieur", kind: "ds" },
-      { start: "13:00", end: "14:00", title: "Histoire-Géographie", kind: "cours" },
-      { start: "15:00", end: "16:00", title: "Travail perso au lycée", kind: "travail" },
-    ],
-  },
-  {
-    date: "2026-11-06",
-    short: "Ven 6",
-    long: "Vendredi 6 novembre",
-    events: [
-      { start: "08:00", end: "10:00", title: "Sciences de l'Ingénieur", kind: "cours" },
-      { start: "10:00", end: "12:00", title: "Physique-Chimie", kind: "cours" },
-      { start: "13:00", end: "15:00", title: "Histoire-Géographie", kind: "cours" },
-      { start: "15:00", end: "16:00", title: "Travail au lycée", kind: "travail" },
-      { start: "16:00", end: "17:00", title: "Vie de classe", kind: "cours" },
-      { start: "18:00", end: "20:00", title: "🏐 Volleyball", kind: "sport" },
-    ],
-  },
-  {
-    date: "2026-11-07",
-    short: "Sam 7",
-    long: "Samedi 7 novembre — match",
-    events: [
-      { start: "09:00", end: "10:30", title: "Révision Maths", kind: "revision", obj: "Départ au match juste après" },
-      { start: "11:00", end: "16:30", title: "🏅 Match de volley", kind: "sport", obj: "11h · retour ~16h30 · repos au retour (hors agenda, sur demande)" },
-    ],
-  },
-  {
-    date: "2026-11-08",
-    short: "Dim 8",
-    long: "Dimanche 8 novembre",
-    events: [
-      { start: "09:30", end: "11:30", title: "PC & Histoire-Géo + prépa semaine", kind: "revision" },
-      { start: "14:00", end: "15:30", title: "Maths — suite", kind: "revision", obj: "Récupère la séance raccourcie de samedi" },
-      { start: "15:45", end: "17:00", title: "Anglais & Espagnol", kind: "revision" },
-    ],
-  },
-];
-
-interface Deadline {
-  subject: string;
-  when: string;
-  at: string;
-  icon: "flask" | "atom" | "bolt";
-  done: number;
-  total: number;
-}
-const DEADLINES: Deadline[] = [
-  { subject: "Physique-Chimie", when: "mardi 3 nov. · matin", at: "2026-11-03T08:00:00+01:00", icon: "flask", done: 1, total: 3 },
-  { subject: "Enseignement scientifique", when: "mardi 3 nov. · matin", at: "2026-11-03T08:00:00+01:00", icon: "atom", done: 1, total: 2 },
-  { subject: "Sciences de l'Ingénieur", when: "jeudi 5 nov. · 10h", at: "2026-11-05T10:00:00+01:00", icon: "bolt", done: 0, total: 3 },
-];
-
-const RING = { fait: 3, planifie: 14, objectif: 20 };
-
-/* ================= Helpers ================= */
-
-const FONT =
-  '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
-
-interface Pal {
-  bg: string;
-  card: string;
-  border: string;
-  text: string;
-  sub: string;
-  chip: string;
-  chipBorder: string;
-  blue: string;
-  green: string;
-  orange: string;
-  red: string;
-  purple: string;
-  teal: string;
-  shadow: string;
-  grid: string;
-  segActive: string;
-}
-const LIGHT: Pal = {
-  bg: "#F2F2F7",
-  card: "#FFFFFF",
-  border: "rgba(60,60,67,0.10)",
-  text: "#1C1C1E",
-  sub: "#6E6E73",
-  chip: "#EFEFF4",
-  chipBorder: "rgba(60,60,67,0.08)",
-  blue: "#007AFF",
-  green: "#34C759",
-  orange: "#FF9500",
-  red: "#FF3B30",
-  purple: "#AF52DE",
-  teal: "#00A3BF",
-  shadow: "0 1px 3px rgba(0,0,0,0.06), 0 4px 14px rgba(0,0,0,0.04)",
-  grid: "rgba(60,60,67,0.12)",
-  segActive: "#FFFFFF",
-};
-const DARK: Pal = {
-  bg: "#000000",
-  card: "#1C1C1E",
-  border: "rgba(255,255,255,0.10)",
-  text: "#F5F5F7",
-  sub: "#98989F",
-  chip: "#2C2C2E",
-  chipBorder: "rgba(255,255,255,0.08)",
-  blue: "#0A84FF",
-  green: "#30D158",
-  orange: "#FF9F0A",
-  red: "#FF453A",
-  purple: "#BF5AF2",
-  teal: "#40C8E0",
-  shadow: "0 1px 3px rgba(0,0,0,0.5)",
-  grid: "rgba(255,255,255,0.12)",
-  segActive: "#3A3A3C",
-};
-
-// Couleur par type uniquement : l'ancien champ "label" n'était jamais affiché.
-const KIND_COLOR: Record<Kind, (t: Pal) => string> = {
-  cours: (t) => t.blue,
-  revision: (t) => t.purple,
-  travail: (t) => t.teal,
-  sport: (t) => t.green,
-  ds: (t) => t.red,
-};
-
-const mins = (t: string) => parseInt(t.slice(0, 2), 10) * 60 + parseInt(t.slice(3), 10);
-const durH = (ev: Ev) => (mins(ev.end) - mins(ev.start)) / 60;
-const fmtT = (t: string) => t.replace(":", "h");
-const evDate = (date: string, time: string) => new Date(`${date}T${time}:00+01:00`);
-const dateKey = (d: Date) =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-
-function countdown(now: Date, target: Date): { past: boolean; d: number; h: number; m: number } {
-  const ms = target.getTime() - now.getTime();
-  if (ms <= 0) return { past: true, d: 0, h: 0, m: 0 };
-  return {
-    past: false,
-    d: Math.floor(ms / 86400000),
-    h: Math.floor((ms % 86400000) / 3600000),
-    m: Math.floor((ms % 3600000) / 60000),
-  };
-}
-
-/* ================= Sous-composants ================= */
-
-function Card(props: {
-  t: Pal;
-  className?: string;
-  style?: React.CSSProperties;
-  children: React.ReactNode;
-}) {
-  return (
-    <section
-      className={props.className}
-      style={{
-        background: props.t.card,
-        border: `1px solid ${props.t.border}`,
-        borderRadius: 20,
-        boxShadow: props.t.shadow,
-        padding: 20,
-        ...props.style,
-      }}
-    >
-      {props.children}
-    </section>
-  );
-}
-
-function CardHead(props: { t: Pal; icon?: React.ReactNode; iconBg?: string; title: string; sub?: string; right?: React.ReactNode }) {
-  return (
-    <div className="mb-4 flex items-start justify-between gap-3">
-      <div className="flex items-center gap-3">
-        {props.icon && (
-          <span
-            aria-hidden="true"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
-            style={{ background: props.iconBg || props.t.chip }}
-          >
-            {props.icon}
-          </span>
-        )}
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="theme-color" content="#F2F2F7" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📅</text></svg>" />
+    <title>Dashboard Dogukan</title>
+    <style>
+      :root { --bg: #f2f2f7; --card: #ffffff; --border: rgba(60,60,67,0.10); --text: #1c1c1e; --sub: #6e6e73; --chip: #efeff4; --chipborder: rgba(60,60,67,0.08); --blue: #007aff; --green: #34c759; --orange: #ff9500; --red: #ff3b30; --purple: #af52de; --teal: #00a3bf; --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 14px rgba(0,0,0,0.04); --segactive: #ffffff; --focus: #0a84ff; }
+      html[data-theme="dark"] { --bg: #000000; --card: #1c1c1e; --border: rgba(255,255,255,0.10); --text: #f5f5f7; --sub: #98989f; --chip: #2c2c2e; --chipborder: rgba(255,255,255,0.08); --blue: #0a84ff; --green: #30d158; --orange: #ff9f0a; --red: #ff453a; --purple: #bf5af2; --teal: #40c8e0; --shadow: 0 1px 3px rgba(0,0,0,0.5); --segactive: #3a3a3c; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+      .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px 40px; }
+      h1 { font-size: 30px; margin: 0; letter-spacing: -0.5px; }
+      h2 { font-size: 15px; margin: 0; }
+      p { margin: 0; }
+      .tnum { font-variant-numeric: tabular-nums; }
+      header.top { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+      .sub { color: var(--sub); font-size: 14px; margin-top: 4px; }
+      .topright { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+      .updated { display: inline-flex; align-items: center; gap: 6px; background: var(--chip); color: var(--sub); border-radius: 999px; padding: 7px 12px; font-size: 11px; font-weight: 600; }
+      .updated.ok { background: rgba(52,199,89,0.10); color: var(--green); }
+      .updated.warn { background: rgba(255,149,0,0.10); color: var(--orange); }
+      .updated.err { background: rgba(255,59,48,0.10); color: var(--red); }
+      .refreshbtn { appearance: none; border: 0; background: var(--chip); color: var(--sub); font: inherit; font-size: 13px; border-radius: 999px; width: 36px; height: 36px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+      .refreshbtn.spin { animation: spin 1s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .seg { display: flex; background: var(--chip); border-radius: 999px; padding: 3px; }
+      .seg button { appearance: none; border: 0; background: transparent; color: var(--sub); font: inherit; font-size: 12px; font-weight: 600; min-height: 36px; padding: 0 12px; border-radius: 999px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+      .seg button[aria-checked="true"] { background: var(--segactive); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
+      html[data-theme="dark"] .seg button[aria-checked="true"] { box-shadow: none; }
+      .grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
+      @media (min-width: 640px) { .grid { grid-template-columns: repeat(2, 1fr); } .span2 { grid-column: span 2; } }
+      @media (min-width: 1000px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+      .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; box-shadow: var(--shadow); }
+      .card.hero { background: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 55%, #af52de 100%); border: none; color: #fff; }
+      .card.hero .sub { color: rgba(255,255,255,0.85); }
+      .kicker { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.85); }
+      .head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+      .head .l { display: flex; align-items: center; gap: 12px; }
+      .ico { width: 36px; height: 36px; border-radius: 12px; background: var(--chip); display: inline-flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+      .head .sub { font-size: 12px; margin-top: 1px; }
+      .pill { display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; padding: 4px 10px; font-size: 11px; font-weight: 600; background: var(--chip); color: var(--sub); white-space: nowrap; }
+      .pill.g { background: rgba(52,199,89,0.12); color: var(--green); }
+      .pill.o { background: rgba(255,149,0,0.12); color: var(--orange); }
+      .pill.p { background: rgba(175,82,222,0.10); color: var(--purple); }
+      .big { font-size: 52px; font-weight: 700; line-height: 1; }
+      .legend { margin-top: 12px; font-size: 13px; display: grid; gap: 6px; }
+      .legend .row { display: flex; align-items: center; justify-content: space-between; }
+      .legend .lbl { display: flex; align-items: center; gap: 8px; color: var(--sub); }
+      .dot { width: 10px; height: 10px; border-radius: 999px; display: inline-block; background: var(--green); }
+      .ev { display: flex; gap: 12px; align-items: flex-start; padding: 8px; border-radius: 12px; }
+      .ev.past { opacity: 0.45; }
+      .ev.hl { background: rgba(175,82,222,0.06); }
+      .ev .time { width: 76px; flex-shrink: 0; text-align: right; font-size: 13px; font-weight: 600; padding-top: 2px; }
+      .ev .time small { font-size: 10px; font-weight: 400; color: var(--sub); }
+      .ev .st { width: 8px; height: 8px; border-radius: 999px; margin-top: 8px; flex-shrink: 0; background: var(--kc); }
+      .k-cours { --kc: var(--blue); } .k-revision { --kc: var(--purple); } .k-travail { --kc: var(--teal); }
+      .k-sport { --kc: var(--green); } .k-ds { --kc: var(--red); }
+      .ev .t { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; line-height: 1.3; }
+      .ev .titleline { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+      .chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px; scrollbar-width: none; }
+      .chips::-webkit-scrollbar { display: none; }
+      .chips button { appearance: none; border: 1px solid var(--chipborder); background: var(--chip); color: var(--text); font: inherit; font-size: 12px; font-weight: 600; min-height: 44px; min-width: 64px; border-radius: 16px; padding: 0 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0; }
+      .chips button.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+      .chips .cdots { display: flex; gap: 4px; }
+      .timeline { max-height: 340px; overflow-y: auto; }
+      .note { font-size: 11px; color: var(--sub); margin-top: 12px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+      .note .lbl { display: flex; align-items: center; gap: 4px; }
+      .dl { margin-bottom: 16px; }
+      .dl:last-child { margin-bottom: 0; }
+      .dl .topline { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 14px; font-weight: 600; }
+      .dl .topline .n { display: flex; align-items: center; gap: 8px; }
+      .dl .when { font-size: 12px; color: var(--sub); margin-top: 2px; }
+      .pbar { height: 6px; background: var(--chip); border-radius: 999px; overflow: hidden; flex: 1; }
+      .pbar > div { height: 100%; background: var(--red); border-radius: 999px; transition: width 1s cubic-bezier(0.33,1,0.68,1); }
+      .prow { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+      .prow .ct { font-size: 11px; font-weight: 600; color: var(--sub); white-space: nowrap; }
+      .rowline { display: flex; align-items: center; justify-content: space-between; font-size: 14px; }
+      .rowline .r { font-size: 12px; color: var(--sub); text-align: right; }
+      .box { background: var(--chip); border-radius: 12px; padding: 10px 12px; }
+      .box.warn { background: rgba(255,149,0,0.08); border: 1px solid rgba(255,149,0,0.2); }
+      .sportline { font-size: 13px; display: flex; justify-content: space-between; gap: 8px; padding: 7px 2px; border-top: 1px solid var(--border); }
+      .sportline:first-of-type { border-top: 0; }
+      .goal { background: var(--chip); border-radius: 12px; padding: 8px 12px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; margin-top: 10px; }
+      .bignum { font-size: 40px; font-weight: 700; line-height: 1; }
+      .bignum small { font-size: 20px; font-weight: 600; color: var(--sub); }
+      .chart { display: flex; align-items: flex-end; gap: 6px; height: 180px; padding: 4px 0 0; }
+      .chart .col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; gap: 4px; }
+      .chart .bar { width: 100%; max-width: 30px; background: var(--blue); border-radius: 6px 6px 4px 4px; }
+      .chart .lbl { font-size: 9px; color: var(--sub); white-space: nowrap; }
+      .agent { display: grid; gap: 16px; }
+      @media (min-width: 640px) { .agent { grid-template-columns: 1fr 1fr; } }
+      .auto { background: var(--chip); border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; }
+      .auto .t { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+      .auto .d { font-size: 12px; color: var(--sub); margin-top: 2px; }
+      .skills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+      .skills span { background: rgba(175,82,222,0.08); color: var(--purple); border-radius: 999px; padding: 4px 10px; font-size: 11px; font-weight: 600; }
+      .cmds { display: flex; flex-wrap: wrap; gap: 8px; }
+      .cmds span { border: 1px solid var(--chipborder); background: var(--chip); color: var(--text); border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 500; }
+      .sys { display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; }
+      .sys span { background: var(--chip); border-radius: 12px; padding: 6px 12px; }
+      .sys b { font-weight: 600; }
+      .sect { font-size: 13px; font-weight: 600; margin: 4px 0 8px; display: flex; align-items: center; gap: 6px; }
+      .foot { text-align: center; font-size: 11px; color: var(--sub); margin-top: 32px; }
+      .banner { border-radius: 16px; padding: 12px 16px; font-size: 14px; font-weight: 600; margin-bottom: 16px; }
+      .banner.warn { background: rgba(255,149,0,0.10); border: 1px solid rgba(255,149,0,0.25); color: var(--orange); }
+      .banner.err { background: rgba(255,59,48,0.08); border: 1px solid rgba(255,59,48,0.25); color: var(--red); }
+      .banner p { font-weight: 500; font-size: 13px; margin-top: 6px; }
+      button:focus-visible, a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+      @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="top">
         <div>
-          <h2 className="text-[15px] font-semibold leading-tight" style={{ color: props.t.text }}>
-            {props.title}
-          </h2>
-          {props.sub && (
-            <p className="text-xs" style={{ color: props.t.sub }}>
-              {props.sub}
-            </p>
-          )}
+          <h1>Salut, Dogukan 👋</h1>
+          <p class="sub" id="hdrsub"></p>
         </div>
-      </div>
-      {props.right}
-    </div>
-  );
-}
-
-function Pill(props: { t: Pal; color?: string; children: React.ReactNode }) {
-  return (
-    <span
-      className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold"
-      style={{
-        background: props.color ? `${props.color}1A` : props.t.chip,
-        color: props.color || props.t.sub,
-      }}
-    >
-      {props.children}
-    </span>
-  );
-}
-
-function EventRow(props: { t: Pal; ev: Ev; past: boolean; now: Date; dayDate: string; highlight?: boolean }) {
-  const color = KIND_COLOR[props.ev.kind](props.t);
-  const startD = evDate(props.dayDate, props.ev.start);
-  const endD = evDate(props.dayDate, props.ev.end);
-  const c = countdown(props.now, startD);
-  // Badge « En cours » affiché en direct pendant la séance (avant, rien ne s'affichait).
-  const running = startD.getTime() <= props.now.getTime() && props.now.getTime() < endD.getTime();
-  return (
-    <div
-      className="flex items-start gap-3 rounded-xl px-2 py-2"
-      style={{ opacity: props.past ? 0.45 : 1, background: props.highlight ? `${color}0F` : "transparent" }}
-    >
-      <div
-        className="tnum w-[76px] shrink-0 pt-[3px] text-right text-[13px] font-semibold"
-        style={{ color: props.past ? props.t.sub : props.t.text }}
-      >
-        {fmtT(props.ev.start)}
-        <span className="text-[10px] font-normal" style={{ color: props.t.sub }}>
-          {" – "}
-          {fmtT(props.ev.end)}
-        </span>
-      </div>
-      <div className="mt-[7px] h-2 w-2 shrink-0 rounded-full" style={{ background: color }} aria-hidden="true" />
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[14px] font-semibold leading-snug" style={{ color: props.t.text }}>
-            {props.ev.title}
-          </span>
-          {props.past ? (
-            <IconCircleCheck className="h-4 w-4 shrink-0" style={{ color: props.t.green }} aria-label="Terminé" />
-          ) : running ? (
-            <Pill t={props.t} color={color}>En cours</Pill>
-          ) : props.highlight && !c.past ? (
-            <Pill t={props.t} color={color}>
-              {c.d > 0 ? `J–${c.d}` : `dans ${c.h}h${String(c.m).padStart(2, "0")}`}
-            </Pill>
-          ) : null}
+        <div class="topright">
+          <span class="updated" id="syncbadge">⏳ Connexion…</span>
+          <button class="refreshbtn" id="refreshbtn" title="Synchroniser maintenant" aria-label="Synchroniser maintenant">↻</button>
+          <div class="seg" role="radiogroup" aria-label="Thème du dashboard" id="themeseg"></div>
         </div>
-        {props.ev.obj && (
-          <p className="mt-0.5 text-xs leading-snug" style={{ color: props.t.sub }}>
-            {props.ev.obj}
-          </p>
-        )}
-      </div>
+      </header>
+      <div id="banner"></div>
+      <main class="grid" id="app" aria-label="Tableau de bord"></main>
+      <p class="foot">Système personnel Dogukan · Notion + Google Calendar + Notion Calendar · Synchronisé automatiquement avec ton agenda · Hébergé gratuitement sur GitHub Pages</p>
     </div>
-  );
-}
 
-/* ================= App ================= */
+    <script>
+      /* ════════════════════════════════════════════════════════════════
+         ⚙️ CONFIGURATION — c'est le seul bloc que tu dois éditer
+         ════════════════════════════════════════════════════════════════
+         1) Va sur calendar.google.com → ⚙️ Paramètres → « Paramètres de mes
+            agendas » → ton agenda principal.
+         2) Descends jusqu'à « Adresse secrète au format iCal » → copie-la.
+         3) Colle-la ci-dessous entre les guillemets, à la place du texte
+            COLLE_ICI. Le dashboard se synchronisera alors tout seul.
+      ══════════════════════════════════════════════════════════════════ */
 
-export default function App() {
-  const [mode, setMode] = useState<"auto" | "light" | "dark">("auto");
-  const [systemDark, setSystemDark] = useState(false);
-  const [reduced, setReduced] = useState(false);
-  const [now, setNow] = useState(() => new Date());
-  const [selectedDay, setSelectedDay] = useState<string | null>(null);
-  const [ringGrow, setRingGrow] = useState(false);
+      var ICAL_URL = "COLLE_ICI_TON_ADRESSE_ICAL";
 
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const upd = () => setSystemDark(mq.matches);
-    upd();
-    mq.addEventListener("change", upd);
-    const rmq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const updR = () => setReduced(rmq.matches);
-    updR();
-    rmq.addEventListener("change", updR);
-    const id = window.setInterval(() => setNow(new Date()), 30000);
-    const growId = window.setTimeout(() => setRingGrow(true), 80);
-    return () => {
-      mq.removeEventListener("change", upd);
-      rmq.removeEventListener("change", updR);
-      window.clearInterval(id);
-      window.clearTimeout(growId);
-    };
-  }, []);
+      var SUBTITLE = "Vacances de la Toussaint — reprise lundi 2 nov."; // mets à jour au fil de l'année (ou vide "")
 
-  const dark = mode === "dark" || (mode === "auto" && systemDark);
-  const t = dark ? DARK : LIGHT;
-  const expired = now.getTime() > SNAPSHOT_END.getTime();
+      var DEADLINES = [
+        { subject: "Physique-Chimie", when: "mardi 3 nov. · matin", at: "2026-11-03T08:00:00+01:00", icon: "🧪", done: 1, total: 3 },
+        { subject: "Enseignement scientifique", when: "mardi 3 nov. · matin", at: "2026-11-03T08:00:00+01:00", icon: "🔬", done: 1, total: 2 },
+        { subject: "Sciences de l'Ingénieur", when: "jeudi 5 nov. · 10h", at: "2026-11-05T10:00:00+01:00", icon: "⚙️", done: 0, total: 3 }
+      ];
 
-  /* Prochaine journée avec des événements à venir */
-  const todayK = dateKey(now);
-  const upcoming = useMemo(() => {
-    for (const d of DAYS) {
-      const evs = d.events.filter((e) => evDate(d.date, e.end).getTime() > now.getTime());
-      if (evs.length > 0) return { day: d, events: evs, isToday: d.date === todayK };
-    }
-    return null;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [Math.floor(now.getTime() / 60000)]);
+      var RING = { fait: 3, objectif: 20 };      // heures accomplies (à ajuster) + objectif hebdo
+      var NOTES = [];                            // [{ subject: "Maths", value: "18/20", date: "3 nov." }]
+      var OBJECTIFS = ["🚩 Prépa MPSI → MP*", "🎯 ISAE-SUPAERO · INSA Toulouse", "⏱️ 15–20 h de travail perso / semaine"];
+      var STATIC_SPORT = [
+        { t: "🏐 Volleyball", r: "mardi & vendredi · 18h–20h" },
+        { t: "🥋 Karaté", r: "mercredi · 18h30–20h" }
+      ];
 
-  const day = DAYS.find((d) => d.date === (selectedDay || (upcoming ? upcoming.day.date : DAYS[0].date))) || DAYS[0];
-  const dayIsToday = day.date === todayK;
+      /* Règles de classification automatique des événements du calendrier */
+      var KIND_RULES = [
+        { re: /\bDS\b|devoir surveillé|interrogation|composition/i, kind: "ds" },
+        { re: /volley|karat|match|entraînement|entrainement|sport|EPS/i, kind: "sport" },
+        { re: /révision|revis|relecture|fiche|mémorisation|bloc/i, kind: "revision" },
+        { re: /travail perso|autonomie|devoir maison|DM\b|apprentyhunter/i, kind: "travail" }
+      ];
 
-  // Le héros suit dynamiquement le prochain DS à venir : plus d'index figé ni de libellés en dur.
-  const upcomingDl = DEADLINES.filter((dl) => !countdown(now, new Date(dl.at)).past);
-  const hero = upcomingDl[0] ?? DEADLINES[DEADLINES.length - 1];
-  const heroC = countdown(now, new Date(hero.at));
-  const heroTitle = upcomingDl.filter((dl) => dl.at === hero.at).map((dl) => dl.subject).join(" + ");
-  const nextDl = upcomingDl.find((dl) => dl.at !== hero.at);
-  const nextC = nextDl ? countdown(now, new Date(nextDl.at)) : null;
+      var SYNC_EVERY_MS = 5 * 60 * 1000;  // synchro calendrier : toutes les 5 minutes
+      var DAYS_COUNT = 12;                // horizon du planning : 12 jours
 
-  // Données statiques mémoïsées : aucun recalcul à chaque tick de 30 s ni au changement de thème.
-  const { charge, totalVac, totalDsWeek } = useMemo(() => {
-    const charge = DAYS.map((d) => ({
-      name: d.short,
-      heures: Math.round(d.events.filter((e) => e.kind === "revision" || e.kind === "travail").reduce((s, e) => s + durH(e), 0) * 4) / 4,
-    }));
-    return {
-      charge,
-      totalVac: charge.slice(0, 4).reduce((s, c) => s + c.heures, 0),
-      totalDsWeek: charge.slice(4).reduce((s, c) => s + c.heures, 0),
-    };
-  }, []);
+      /* ════════════ Fin de la configuration ════════════ */
 
-  const nextFirst = upcoming ? upcoming.events[0] : null;
-  const nextCountdown = upcoming && nextFirst ? countdown(now, evDate(upcoming.day.date, nextFirst.start)) : null;
+      var KINDRGB = { cours: "0,122,255", revision: "175,82,222", travail: "0,163,191", sport: "52,199,89", ds: "255,59,48" };
+      var SHORTDAYS = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
 
-  const css = `
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
-    *:focus-visible { outline: 2px solid #0A84FF; outline-offset: 2px; }
-    .tnum { font-variant-numeric: tabular-nums; }
-    button { transition: background-color .15s ease, color .15s ease, transform .15s ease; }
-    ${reduced ? "* { transition: none !important; animation: none !important; }" : ""}
-  `;
+      /* Données de secours (snapshot du 28 oct. 2026) — affichées uniquement
+         si le calendrier est injoignable et aucune synchro n'a jamais réussi. */
+      var FALLBACK = [
+        { d: "2026-10-29", s: "09:30", e: "11:00", t: "Révision SI #1", k: "revision", o: "Schéma-blocs : chaîne d'énergie + d'information" },
+        { d: "2026-10-29", s: "13:30", e: "14:30", t: "Histoire-Géo & EMC", k: "revision", o: "Fiche EMC + relecture active HG" },
+        { d: "2026-10-29", s: "15:00", e: "16:00", t: "Révision PC #2", k: "revision", o: "1 exercice type DS complet" },
+        { d: "2026-10-30", s: "09:30", e: "10:30", t: "Révision ES #2", k: "revision" },
+        { d: "2026-10-30", s: "11:00", e: "12:00", t: "Maths", k: "revision" },
+        { d: "2026-10-30", s: "14:00", e: "15:00", t: "Révision SI #2", k: "revision" },
+        { d: "2026-10-30", s: "18:00", e: "20:00", t: "🏐 Volleyball", k: "sport" },
+        { d: "2026-10-31", s: "09:30", e: "10:30", t: "Révision PC #3", k: "revision" },
+        { d: "2026-10-31", s: "14:00", e: "14:30", t: "Relecture fiches ES", k: "revision" },
+        { d: "2026-10-31", s: "15:00", e: "16:30", t: "Français & Latin", k: "revision" },
+        { d: "2026-11-01", s: "09:30", e: "10:30", t: "Révision SI #3", k: "revision" },
+        { d: "2026-11-01", s: "10:45", e: "11:15", t: "Relecture légère PC + ES", k: "revision" },
+        { d: "2026-11-02", s: "08:00", e: "09:00", t: "Anglais LV1", k: "cours" },
+        { d: "2026-11-02", s: "13:00", e: "14:00", t: "EMC", k: "cours" },
+        { d: "2026-11-02", s: "14:00", e: "16:00", t: "Mathématiques", k: "cours" },
+        { d: "2026-11-02", s: "16:00", e: "18:00", t: "Espagnol LV2", k: "cours" },
+        { d: "2026-11-02", s: "19:30", e: "20:15", t: "Relecture veille de DS — PC + ES", k: "revision", o: "Fiches seulement : dormir tôt" },
+        { d: "2026-11-03", s: "08:00", e: "10:00", t: "⚠️ DS Physique-Chimie + DS Enseignement scientifique", k: "ds" },
+        { d: "2026-11-03", s: "10:00", e: "12:00", t: "Mathématiques", k: "cours" },
+        { d: "2026-11-03", s: "13:00", e: "14:00", t: "LCA Latin", k: "cours" },
+        { d: "2026-11-03", s: "14:00", e: "16:00", t: "Physique-Chimie", k: "cours" },
+        { d: "2026-11-03", s: "17:00", e: "18:00", t: "Français", k: "cours" },
+        { d: "2026-11-03", s: "18:00", e: "20:00", t: "🏐 Volleyball", k: "sport" },
+        { d: "2026-11-03", s: "20:45", e: "21:30", t: "Fiches SI", k: "revision" },
+        { d: "2026-11-04", s: "09:00", e: "10:00", t: "Anglais LV1", k: "cours" },
+        { d: "2026-11-04", s: "10:00", e: "12:00", t: "EPS", k: "sport" },
+        { d: "2026-11-04", s: "13:30", e: "15:30", t: "Révision SI — DS demain", k: "revision" },
+        { d: "2026-11-04", s: "15:45", e: "17:15", t: "Maths", k: "revision" },
+        { d: "2026-11-04", s: "18:30", e: "20:00", t: "🥋 Karaté", k: "sport" },
+        { d: "2026-11-04", s: "20:45", e: "21:15", t: "Révision légère SI", k: "revision" },
+        { d: "2026-11-05", s: "08:00", e: "09:00", t: "LCA Latin", k: "cours" },
+        { d: "2026-11-05", s: "10:00", e: "12:00", t: "⚠️ DS Sciences de l'Ingénieur", k: "ds" },
+        { d: "2026-11-05", s: "13:00", e: "14:00", t: "Histoire-Géographie", k: "cours" },
+        { d: "2026-11-05", s: "15:00", e: "16:00", t: "Travail perso au lycée", k: "travail" },
+        { d: "2026-11-06", s: "08:00", e: "10:00", t: "Sciences de l'Ingénieur", k: "cours" },
+        { d: "2026-11-06", s: "10:00", e: "12:00", t: "Physique-Chimie", k: "cours" },
+        { d: "2026-11-06", s: "13:00", e: "15:00", t: "Histoire-Géographie", k: "cours" },
+        { d: "2026-11-06", s: "15:00", e: "16:00", t: "Travail au lycée", k: "travail" },
+        { d: "2026-11-06", s: "16:00", e: "17:00", t: "Vie de classe", k: "cours" },
+        { d: "2026-11-06", s: "18:00", e: "20:00", t: "🏐 Volleyball", k: "sport" },
+        { d: "2026-11-07", s: "09:00", e: "10:30", t: "Révision Maths", k: "revision" },
+        { d: "2026-11-07", s: "11:00", e: "16:30", t: "🏅 Match de volley", k: "sport", o: "11h · retour ~16h30" },
+        { d: "2026-11-08", s: "09:30", e: "11:30", t: "PC & Histoire-Géo + prépa semaine", k: "revision" },
+        { d: "2026-11-08", s: "14:00", e: "15:30", t: "Maths — suite", k: "revision" },
+        { d: "2026-11-08", s: "15:45", e: "17:00", t: "Anglais & Espagnol", k: "revision" }
+      ].map(function (x) {
+        return { title: x.t, kind: x.k, obj: x.o, start: new Date(x.d + "T" + x.s + ":00+01:00"), end: new Date(x.d + "T" + x.e + ":00+01:00"), allDay: false };
+      });
 
-  return (
-    <div
-      lang="fr"
-      style={{ background: t.bg, color: t.text, fontFamily: FONT, minHeight: "100vh" }}
-    >
-      <style>{css}</style>
-      <div className="mx-auto max-w-6xl px-4 pb-10 pt-6 sm:px-6 sm:pt-8">
-        {/* ===== Header ===== */}
-        <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-[26px] font-bold tracking-tight sm:text-[32px]">Salut, Dogukan 👋</h1>
-            <p className="mt-1 text-sm" style={{ color: t.sub }}>
-              Mercredi 28 octobre · Vacances de la Toussaint — reprise lundi 2 nov.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span
-              className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-[11px] font-semibold sm:inline-flex"
-              style={{ background: t.chip, color: t.sub }}
-              title="Date de la dernière synchronisation par ton agent"
-            >
-              <IconArrowRotateClockwise className="h-3.5 w-3.5" aria-hidden="true" />
-              {UPDATED}
-            </span>
-            <div
-              role="radiogroup"
-              aria-label="Thème du dashboard"
-              className="flex rounded-full p-[3px]"
-              style={{ background: t.chip }}
-            >
-              {([
-                { id: "auto", label: "Auto", icon: <IconArrowRotateClockwise className="h-3.5 w-3.5" aria-hidden="true" /> },
-                { id: "light", label: "Clair", icon: <IconSunCloud className="h-3.5 w-3.5" aria-hidden="true" /> },
-                { id: "dark", label: "Sombre", icon: <IconMoon className="h-3.5 w-3.5" aria-hidden="true" /> },
-              ] as const).map((o) => (
-                <button
-                  key={o.id}
-                  type="button"
-                  role="radio"
-                  aria-checked={mode === o.id}
-                  onClick={() => setMode(o.id)}
-                  className="flex min-h-[36px] items-center gap-1.5 rounded-full px-3 text-[12px] font-semibold"
-                  style={{
-                    background: mode === o.id ? t.segActive : "transparent",
-                    color: mode === o.id ? t.text : t.sub,
-                    boxShadow: mode === o.id && !dark ? "0 1px 4px rgba(0,0,0,0.12)" : "none",
-                  }}
-                >
-                  {o.icon}
-                  <span className="hidden sm:inline">{o.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </header>
+      var state = { events: [], lastSync: null, source: "setup", syncing: false };
 
-        {expired && (
-          <div
-            role="alert"
-            className="mb-4 rounded-2xl px-4 py-3 text-sm font-semibold"
-            style={{ background: `${t.orange}1A`, color: t.orange, border: `1px solid ${t.orange}40` }}
-          >
-            ⚠️ Ce snapshot date du 28 octobre — dis simplement « mets à jour mon dashboard » et je rafraîchis tout.
-          </div>
-        )}
+      /* ---------- Utilitaires ---------- */
+      function pad(n) { return String(n).padStart(2, "0"); }
+      function fr(n) { return String(n).replace(".", ","); }
+      function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+      function fmtH(d) { return pad(d.getHours()) + "h" + pad(d.getMinutes()); }
+      function dkey(d) { return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
+      function frDate(d) {
+        return cap(new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long" }).format(d));
+      }
+      function frDateTime(d) { return SHORTDAYS[d.getDay()] + " " + d.getDate() + " · " + fmtH(d); }
+      function countdown(now, target) {
+        var ms = target.getTime() - now.getTime();
+        if (ms <= 0) return { past: true, d: 0, h: 0, m: 0 };
+        return { past: false, d: Math.floor(ms / 86400000), h: Math.floor((ms % 86400000) / 3600000), m: Math.floor((ms % 3600000) / 60000) };
+      }
+      function urlOk() { return ICAL_URL && ICAL_URL.indexOf("COLLE_ICI") === -1 && /^https?:\/\//.test(ICAL_URL); }
 
-        <main className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" aria-label="Tableau de bord">
-          {/* ===== Hero : compte à rebours DS ===== */}
-          <Card
-            t={t}
-            style={{
-              background: "linear-gradient(135deg, #0A84FF 0%, #5E5CE6 55%, #AF52DE 100%)",
-              border: "none",
-              color: "#fff",
-            }}
-          >
-            <div className="flex items-center gap-2 text-[13px] font-semibold uppercase tracking-wide" style={{ opacity: 0.85 }}>
-              <IconTimer className="h-4 w-4" aria-hidden="true" />
-              Prochain devoir surveillé
-            </div>
-            <p className="mt-3 text-[22px] font-bold leading-tight">{heroTitle || hero.subject}</p>
-            <p className="mt-1 text-sm" style={{ opacity: 0.85 }}>
-              {hero.when}
-            </p>
-            <div className="mt-5 flex items-end gap-2" aria-live="polite">
-              {!heroC.past ? (
-                <>
-                  <span className="tnum text-[52px] font-bold leading-none">J–{heroC.d}</span>
-                  <span className="tnum pb-1 text-lg font-semibold" style={{ opacity: 0.9 }}>
-                    {heroC.h}h{String(heroC.m).padStart(2, "0")}
-                  </span>
-                </>
-              ) : (
-                <span className="text-[32px] font-bold">Terminé 🎉</span>
-              )}
-            </div>
-            <div className="mt-4 rounded-xl px-3 py-2.5 text-[13px] font-medium" style={{ background: "rgba(255,255,255,0.16)" }}>
-              {nextDl && nextC ? (
-                <>
-                  Puis DS {nextDl.subject} — {nextDl.when} ·{" "}
-                  <span className="tnum font-bold">{nextC.past ? "terminé" : `J–${nextC.d}`}</span>
-                </>
-              ) : (
-                "Tous les DS de ce snapshot sont passés 🎉"
-              )}
-            </div>
-          </Card>
+      /* ---------- Parsing ICS ---------- */
+      function unfold(t) { return t.replace(/\r\n/g, "\n").replace(/\r/g, "\n").replace(/\n[ \t]/g, ""); }
+      function unesc(s) { return s.replace(/\\n/gi, " ").replace(/\\,/g, ",").replace(/\\;/g, ";").replace(/\\\\/g, "\\"); }
+      function tzOffsetMs(tz, date) {
+        var f = new Intl.DateTimeFormat("en-US", { timeZone: tz, hour12: false, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" });
+        var p = {}; f.formatToParts(date).forEach(function (x) { p[x.type] = x.value; });
+        return Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute, +p.second) - date.getTime();
+      }
+      function parseDT(val, params) {
+        var m;
+        if ((m = val.match(/^(\d{4})(\d{2})(\d{2})$/))) return new Date(+m[1], +m[2] - 1, +m[3]);
+        if ((m = val.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(Z?)$/))) {
+          if (m[7] === "Z") return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]));
+          var tz = (params.match(/TZID=([^;:]+)/) || [])[1];
+          if (tz) {
+            var guess = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]));
+            try { return new Date(guess.getTime() - tzOffsetMs(tz, guess)); } catch (e) {}
+          }
+          return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]);
+        }
+        return null;
+      }
+      function classify(t) {
+        for (var i = 0; i < KIND_RULES.length; i++) if (KIND_RULES[i].re.test(t)) return KIND_RULES[i].kind;
+        return "cours";
+      }
+      function parseICS(text) {
+        var out = [], ev = null, seen = {};
+        unfold(text).split("\n").forEach(function (L) {
+          if (L.indexOf("BEGIN:VEVENT") === 0) { ev = {}; return; }
+          if (L.indexOf("END:VEVENT") === 0) {
+            if (ev && ev.start && ev.summary && ev.status !== "CANCELLED") {
+              var k = ev.summary + "@" + ev.start.getTime();
+              if (!seen[k]) { seen[k] = 1; out.push(ev); }
+            }
+            ev = null; return;
+          }
+          if (!ev) return;
+          var ci = L.indexOf(":"); if (ci < 0) return;
+          var left = L.slice(0, ci), val = L.slice(ci + 1);
+          var semi = left.indexOf(";"), name = semi < 0 ? left : left.slice(0, semi), params = semi < 0 ? "" : left.slice(semi + 1);
+          if (name === "SUMMARY") ev.summary = unesc(val);
+          else if (name === "DESCRIPTION") ev.desc = unesc(val);
+          else if (name === "STATUS") ev.status = val;
+          else if (name === "DTSTART") { ev.start = parseDT(val, params); ev.allDay = /^\d{8}$/.test(val); }
+          else if (name === "DTEND") ev.end = parseDT(val, params);
+        });
+        return out.map(function (e) {
+          return { title: e.summary.trim(), kind: classify(e.summary), obj: (e.desc || "").split("\n")[0].slice(0, 120) || null, start: e.start, end: e.end || new Date(e.start.getTime() + 3600000), allDay: !!e.allDay };
+        });
+      }
 
-          {/* ===== Anneaux de progression ===== */}
-          <Card t={t}>
-            <CardHead
-              t={t}
-              icon={<IconChart className="h-5 w-5" style={{ color: t.red }} />}
-              iconBg={`${t.red}1A`}
-              title="Travail perso — semaine du 26 oct."
-              sub="Anneaux : accompli · planifié · objectif"
-            />
-            <div className="flex items-center justify-center">
-              <svg viewBox="0 0 200 200" className="h-[170px] w-[170px]" role="img" aria-label={`Accompli ${RING.fait} heures sur un objectif de ${RING.objectif} heures, ${RING.planifie} heures planifiées`}>
-                {[
-                  { r: 78, color: t.red, pct: 1 },
-                  { r: 62, color: t.blue, pct: RING.planifie / RING.objectif },
-                  { r: 46, color: t.green, pct: RING.fait / RING.objectif },
-                ].map((ring, i) => {
-                  const c = 2 * Math.PI * ring.r;
-                  const p = ringGrow || reduced ? ring.pct : 0;
-                  return (
-                    <g key={i} transform="rotate(-90 100 100)">
-                      <circle cx="100" cy="100" r={ring.r} fill="none" stroke={t.chip} strokeWidth="12" />
-                      <circle
-                        cx="100"
-                        cy="100"
-                        r={ring.r}
-                        fill="none"
-                        stroke={ring.color}
-                        strokeWidth="12"
-                        strokeLinecap="round"
-                        strokeDasharray={c}
-                        strokeDashoffset={c * (1 - p)}
-                        style={{ transition: "stroke-dashoffset 1.2s cubic-bezier(0.33,1,0.68,1)" }}
-                      />
-                    </g>
-                  );
-                })}
-                <text x="100" y="96" textAnchor="middle" fontSize="30" fontWeight="700" fill={t.text} fontFamily={FONT}>
-                  {RING.planifie}h
-                </text>
-                <text x="100" y="116" textAnchor="middle" fontSize="11" fill={t.sub} fontFamily={FONT}>
-                  planifiées
-                </text>
-              </svg>
-            </div>
-            <div className="mt-3 space-y-1.5 text-[13px]">
-              {[
-                { color: t.green, label: "Accompli (au 28 oct. soir)", value: `${RING.fait}h` },
-                { color: t.blue, label: "Planifié cette semaine", value: `${RING.planifie}h` },
-                { color: t.red, label: "Objectif max / semaine", value: `${RING.objectif}h` },
-              ].map((r) => (
-                <div key={r.label} className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-full" style={{ background: r.color }} aria-hidden="true" />
-                    <span style={{ color: t.sub }}>{r.label}</span>
-                  </span>
-                  <span className="tnum font-semibold">{r.value}</span>
-                </div>
-              ))}
-            </div>
-            <p className="mt-3 text-xs leading-snug" style={{ color: t.sub }}>
-              Semaine des DS (2–8 nov.) : {Math.round(totalDsWeek * 4) / 4}h — allégée volontairement, la fraîcheur prime le volume.
-            </p>
-          </Card>
+      /* ---------- Synchronisation (multi-relais) ---------- */
+      var PROXIES = [
+        function (u) { return "https://corsproxy.io/?url=" + encodeURIComponent(u); },
+        function (u) { return "https://api.allorigins.win/raw?url=" + encodeURIComponent(u); },
+        function (u) { return "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(u); }
+      ];
+      function withTimeout(p, ms) {
+        return Promise.race([p, new Promise(function (_, r) { setTimeout(function () { r(new Error("timeout")); }, ms); })]);
+      }
+      function saveCache() {
+        try { localStorage.setItem("dogukan-dash-cache-v1", JSON.stringify({ ts: state.lastSync.getTime(), events: state.events })); } catch (e) {}
+      }
+      function loadCache() {
+        try {
+          var raw = localStorage.getItem("dogukan-dash-cache-v1"); if (!raw) return null;
+          var c = JSON.parse(raw);
+          c.events = c.events.map(function (e) { return { title: e.title, kind: e.kind, obj: e.obj, start: new Date(e.start), end: new Date(e.end), allDay: e.allDay }; });
+          return c;
+        } catch (e) { return null; }
+      }
+      async function sync() {
+        if (!urlOk() || state.syncing) { render(); return; }
+        state.syncing = true;
+        var btn = document.getElementById("refreshbtn"); btn.classList.add("spin");
+        var url = ICAL_URL + (ICAL_URL.indexOf("?") < 0 ? "?" : "&") + "_=" + Date.now();
+        for (var i = 0; i < PROXIES.length; i++) {
+          try {
+            var res = await withTimeout(fetch(PROXIES[i](url), { cache: "no-store" }), 20000);
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            var text = await res.text();
+            if (text.indexOf("BEGIN:VCALENDAR") === -1) throw new Error("réponse invalide");
+            state.events = parseICS(text);
+            state.lastSync = new Date(); state.source = "live"; saveCache();
+            state.syncing = false; btn.classList.remove("spin"); render(); return;
+          } catch (e) { /* essai le relais suivant */ }
+        }
+        var c = loadCache();
+        if (c) { state.events = c.events; state.lastSync = new Date(c.ts); state.source = "cache"; }
+        else if (state.source !== "live") { state.events = FALLBACK; state.source = "fallback"; }
+        state.syncing = false; btn.classList.remove("spin"); render();
+      }
 
-          {/* ===== Prochaine journée ===== */}
-          <Card t={t}>
-            <CardHead
-              t={t}
-              icon={<IconBell className="h-5 w-5" style={{ color: t.blue }} />}
-              iconBg={`${t.blue}1A`}
-              title={upcoming ? (upcoming.isToday ? "Aujourd'hui — à venir" : upcoming.day.long) : "Planning terminé"}
-              sub={
-                upcoming
-                  ? `${upcoming.events.length} créneau${upcoming.events.length > 1 ? "x" : ""} à venir${
-                      nextCountdown && !nextCountdown.past
-                        ? ` · prochain ${nextCountdown.d > 0 ? `J–${nextCountdown.d}` : `dans ${nextCountdown.h}h${String(nextCountdown.m).padStart(2, "0")}`}`
-                        : ""
-                    }`
-                  : undefined
-              }
-            />
-            {upcoming ? (
-              <div className="-mx-1 space-y-0.5">
-                {upcoming.events.slice(0, 5).map((ev) => (
-                  <EventRow
-                    key={ev.start + ev.title}
-                    t={t}
-                    ev={ev}
-                    past={false}
-                    now={now}
-                    dayDate={upcoming.day.date}
-                    highlight={ev === nextFirst}
-                  />
-                ))}
-                {upcoming.events.length > 5 && (
-                  <p className="px-2 pt-1 text-xs font-medium" style={{ color: t.sub }}>
-                    + {upcoming.events.length - 5} autres créneaux — voir le planning ↓
-                  </p>
-                )}
-              </div>
-            ) : (
-              <p className="text-sm" style={{ color: t.sub }}>
-                Aucun créneau à venir dans ce snapshot — demande une mise à jour.
-              </p>
-            )}
-          </Card>
+      /* ---------- Construction des journées ---------- */
+      function buildDays() {
+        var days = [], base = new Date(); base.setHours(0, 0, 0, 0);
+        for (var i = 0; i < DAYS_COUNT; i++) { var d = new Date(base); d.setDate(d.getDate() + i); days.push({ d: d, events: [] }); }
+        var map = {}; days.forEach(function (x) { map[dkey(x.d)] = x; });
+        state.events.forEach(function (ev) {
+          var k = dkey(ev.start);
+          if (map[k]) map[k].events.push(ev);
+        });
+        days.forEach(function (x) { x.events.sort(function (a, b) { return a.start - b.start; }); });
+        return days;
+      }
+      function weekPlanHours() {
+        var now = new Date(), mon = new Date(now); mon.setHours(0, 0, 0, 0);
+        mon.setDate(mon.getDate() - ((mon.getDay() + 6) % 7));
+        var h = 0;
+        state.events.forEach(function (e) {
+          if ((e.kind === "revision" || e.kind === "travail") && e.start >= mon && e.start < new Date(mon.getTime() + 7 * 86400000)) h += (e.end - e.start) / 3600000;
+        });
+        return Math.round(h * 4) / 4;
+      }
 
-          {/* ===== Planning 11 jours ===== */}
-          <Card t={t} className="md:col-span-2">
-            <CardHead
-              t={t}
-              icon={<IconGoalFlag className="h-5 w-5" style={{ color: t.purple }} />}
-              iconBg={`${t.purple}1A`}
-              title="Planning — 29 oct. → 8 nov."
-              sub={day.long}
-              right={<Pill t={t} color={t.purple}>{`${day.events.length} créneaux`}</Pill>}
-            />
-            <div
-              className="no-scrollbar -mx-1 mb-4 flex gap-2 overflow-x-auto px-1 pb-1"
-              role="tablist"
-              aria-label="Choisir un jour"
-            >
-              {DAYS.map((d) => {
-                const active = d.date === day.date;
-                const hasDs = d.events.some((e) => e.kind === "ds");
-                const hasSport = d.events.some((e) => e.kind === "sport");
-                return (
-                  <button
-                    key={d.date}
-                    type="button"
-                    role="tab"
-                    aria-selected={active}
-                    aria-label={d.long}
-                    onClick={() => setSelectedDay(d.date)}
-                    className="flex min-h-[44px] min-w-[64px] shrink-0 flex-col items-center justify-center gap-1 rounded-2xl px-3 text-[12px] font-semibold"
-                    style={{
-                      background: active ? t.blue : t.chip,
-                      color: active ? "#fff" : t.text,
-                      border: `1px solid ${active ? t.blue : t.chipBorder}`,
-                    }}
-                  >
-                    {d.short}
-                    <span className="flex gap-1">
-                      {hasDs && <span className="h-1.5 w-1.5 rounded-full" style={{ background: active ? "#fff" : t.red }} aria-hidden="true" />}
-                      {hasSport && <span className="h-1.5 w-1.5 rounded-full" style={{ background: active ? "#fff" : t.green }} aria-hidden="true" />}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-            <div className="-mx-1 max-h-[340px] space-y-0.5 overflow-y-auto px-1">
-              {day.events.map((ev) => (
-                <EventRow
-                  key={ev.start + ev.title}
-                  t={t}
-                  ev={ev}
-                  past={dayIsToday && evDate(day.date, ev.end).getTime() <= now.getTime()}
-                  now={now}
-                  dayDate={day.date}
-                />
-              ))}
-            </div>
-            <p className="mt-3 flex flex-wrap items-center gap-3 text-[11px]" style={{ color: t.sub }}>
-              <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full" style={{ background: t.red }} /> DS</span>
-              <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full" style={{ background: t.green }} /> Sport</span>
-              Règles : rien après 21h30 · sport intouchable · max 2 matières en révision
-            </p>
-          </Card>
+      /* ---------- Rendu ---------- */
+      var selectedDay = null, animated = false;
 
-          {/* ===== Échéances ===== */}
-          <Card t={t}>
-            <CardHead
-              t={t}
-              icon={<IconTarget className="h-5 w-5" style={{ color: t.red }} />}
-              iconBg={`${t.red}1A`}
-              title="Échéances"
-              sub="Base Notion « Échéances »"
-            />
-            <div className="space-y-4">
-              {DEADLINES.map((dl) => {
-                const c = countdown(now, new Date(dl.at));
-                const Icon = dl.icon === "flask" ? IconFlask : IconBolt;
-                const pct = Math.round((dl.done / dl.total) * 100);
-                return (
-                  <div key={dl.subject}>
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="flex items-center gap-2 text-[14px] font-semibold">
-                        <Icon className="h-4 w-4" style={{ color: t.red }} aria-hidden="true" />
-                        {dl.subject}
-                      </span>
-                      <Pill t={t} color={c.past ? t.green : t.orange}>
-                        {c.past ? "Terminé" : `J–${c.d}`}
-                      </Pill>
-                    </div>
-                    <p className="mt-0.5 text-xs" style={{ color: t.sub }}>
-                      {dl.when} · Préparation en cours
-                    </p>
-                    <div className="mt-2 flex items-center gap-2">
-                      <div className="h-1.5 flex-1 overflow-hidden rounded-full" style={{ background: t.chip }}>
-                        <div
-                          className="h-full rounded-full"
-                          style={{
-                            width: ringGrow || reduced ? `${pct}%` : "0%",
-                            background: pct > 0 ? t.red : "transparent",
-                            transition: "width 1s cubic-bezier(0.33,1,0.68,1)",
-                          }}
-                        />
-                      </div>
-                      <span className="tnum text-[11px] font-semibold" style={{ color: t.sub }}>
-                        {dl.done}/{dl.total} révisions
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-              <div className="flex items-center justify-between rounded-xl px-3 py-2.5" style={{ background: t.chip }}>
-                <span className="flex items-center gap-2 text-[13px] font-semibold">
-                  <IconRocket className="h-4 w-4" style={{ color: t.purple }} aria-hidden="true" />
-                  ApprentyHunter
-                </span>
-                <Pill t={t} color={t.purple}>Projet perso</Pill>
-              </div>
-            </div>
-          </Card>
+      function evRow(ev, past, hl, now, showDay) {
+        var c = countdown(now, ev.start);
+        var running = ev.start <= now && now < ev.end;
+        var badge = "";
+        var dayPill = "";
+        if (showDay) dayPill = '<span class="pill" style="background:rgba(' + KINDRGB[ev.kind] + ',0.10);color:rgb(' + KINDRGB[ev.kind] + ')">' + SHORTDAYS[ev.start.getDay()] + " " + ev.start.getDate() + "</span>";
+        if (past) badge = '<span aria-label="Terminé" style="color:var(--green)">✔</span>';
+        else if (running) badge = '<span class="pill" style="background:rgba(' + KINDRGB[ev.kind] + ',0.10);color:rgb(' + KINDRGB[ev.kind] + ')">En cours</span>';
+        else if (hl) badge = '<span class="pill" style="color:var(--kc)">' + (c.d > 0 ? "J–" + c.d : "dans " + c.h + "h" + pad(c.m)) + "</span>";
+        var timeHtml = ev.allDay ? "journée" : fmtH(ev.start) + ' <small>– ' + fmtH(ev.end) + "</small>";
+        return '<div class="ev k-' + ev.kind + (past ? " past" : "") + (hl ? " hl" : "") + '">' +
+          '<div class="time tnum">' + timeHtml + '</div><div class="st" aria-hidden="true"></div>' +
+          '<div style="flex:1;min-width:0"><div class="titleline"><span class="t">' + ev.title + "</span>" + dayPill + badge + "</div>" +
+          (ev.obj ? '<p style="font-size:12px;color:var(--sub);margin:2px 0 0">' + ev.obj + "</p>" : "") + "</div></div>";
+      }
 
-          {/* ===== Sport ===== */}
-          <Card t={t}>
-            <CardHead
-              t={t}
-              icon={<IconHeart2 className="h-5 w-5" style={{ color: t.green }} />}
-              iconBg={`${t.green}1A`}
-              title="Sport"
-              sub="Créneaux fixes — intouchables"
-            />
-            <div className="space-y-2.5 text-[14px]">
-              <div className="flex items-center justify-between">
-                <span className="font-semibold">🏐 Volleyball</span>
-                <span className="text-right text-xs" style={{ color: t.sub }}>
-                  mardi &amp; vendredi · 18h–20h
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="font-semibold">🥋 Karaté</span>
-                <span className="text-right text-xs" style={{ color: t.sub }}>
-                  mercredi · 18h30–20h
-                </span>
-              </div>
-              <div
-                className="rounded-xl px-3 py-2.5"
-                style={{ background: `${t.orange}14`, border: `1px solid ${t.orange}33` }}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2 font-semibold">
-                    <IconMedal className="h-4 w-4" style={{ color: t.orange }} aria-hidden="true" />
-                    Match de volley
-                  </span>
-                  <Pill t={t} color={t.orange}>sam. 7 nov.</Pill>
-                </div>
-                <p className="mt-1 text-xs" style={{ color: t.sub }}>
-                  11h · retour ~16h30 — séances du samedi déplacées au dimanche.
-                </p>
-              </div>
-            </div>
-          </Card>
+      function ringSvg(id, r, color) {
+        var c = 2 * Math.PI * r;
+        return '<circle id="' + id + '" cx="100" cy="100" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="12" stroke-linecap="round" stroke-dasharray="' + c + '" stroke-dashoffset="' + c + '" style="transition: stroke-dashoffset 1.2s cubic-bezier(0.33,1,0.68,1)"/>';
+      }
 
-          {/* ===== Objectifs ===== */}
-          <Card t={t}>
-            <CardHead
-              t={t}
-              icon={<IconRocket className="h-5 w-5" style={{ color: t.blue }} />}
-              iconBg={`${t.blue}1A`}
-              title="Objectifs"
-              sub="Cap sur 2027–2028"
-            />
-            <div className="tnum text-[40px] font-bold leading-none">19+<span className="text-xl font-semibold" style={{ color: t.sub }}>/20</span></div>
-            <div className="mt-4 space-y-2.5 text-[13px]">
-              {[
-                { icon: <IconGoalFlag className="h-4 w-4" style={{ color: t.purple }} />, label: "Prépa MPSI → MP*" },
-                { icon: <IconTarget className="h-4 w-4" style={{ color: t.blue }} />, label: "ISAE-SUPAERO · INSA Toulouse" },
-                { icon: <IconTimer className="h-4 w-4" style={{ color: t.green }} />, label: "15–20 h de travail perso / semaine" },
-              ].map((r) => (
-                <div key={r.label} className="flex items-center gap-2.5 rounded-xl px-3 py-2" style={{ background: t.chip }}>
-                  {r.icon}
-                  <span className="font-semibold">{r.label}</span>
-                </div>
-              ))}
-            </div>
-          </Card>
+      function render() {
+        var now = new Date(), todayK = dkey(now);
+        var app = document.getElementById("app");
+        var chipScroll = 0, chipEl = document.querySelector(".chips");
+        if (chipEl) chipScroll = chipEl.scrollLeft;
 
-          {/* ===== Notes ===== */}
-          <Card t={t}>
-            <CardHead
-              t={t}
-              icon={<IconBook className="h-5 w-5" style={{ color: t.teal }} />}
-              iconBg={`${t.teal}1A`}
-              title="Suivi des notes"
-              sub="Base Notion « Notes »"
-            />
-            <div className="flex items-center gap-3 rounded-xl px-3 py-3" style={{ background: t.chip }}>
-              <span className="text-[28px]">📝</span>
-              <p className="text-[13px] leading-snug" style={{ color: t.sub }}>
-                <span className="font-semibold" style={{ color: t.text }}>Aucune note pour l'instant.</span>{" "}
-                Saisis tes notes dans Notion — elles apparaîtront ici à la prochaine mise à jour.
-              </p>
-            </div>
-            <p className="mt-3 text-xs" style={{ color: t.sub }}>
-              Objectif : rester au-dessus de 19 de moyenne générale.
-            </p>
-          </Card>
+        document.getElementById("hdrsub").textContent = frDate(now) + (SUBTITLE ? " · " + SUBTITLE : "");
 
-          {/* ===== Charge ===== */}
-          <Card t={t}>
-            <CardHead
-              t={t}
-              icon={<IconChart className="h-5 w-5" style={{ color: t.blue }} />}
-              iconBg={`${t.blue}1A`}
-              title="Charge de travail perso"
-              sub="Heures planifiées · 29 oct. → 8 nov."
-            />
-            <div className="h-[220px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={charge} margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={t.grid} />
-                  <XAxis dataKey="name" tick={{ fill: t.sub, fontSize: 10 }} axisLine={false} tickLine={false} interval={0} angle={-38} dy={10} height={44} />
-                  <YAxis tick={{ fill: t.sub, fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <Tooltip
-                    cursor={{ fill: t.chip, radius: 8 }}
-                    contentStyle={{
-                      background: t.card,
-                      border: `1px solid ${t.border}`,
-                      borderRadius: 12,
-                      color: t.text,
-                      fontSize: 12,
-                      boxShadow: t.shadow,
-                    }}
-                    labelStyle={{ color: t.sub, fontWeight: 600 }}
-                    formatter={(v: number) => [`${v} h`, "Travail perso"]}
-                  />
-                  <Bar dataKey="heures" fill={t.blue} radius={[6, 6, 6, 6]} maxBarSize={26} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            <p className="text-xs" style={{ color: t.sub }}>
-              Fin des vacances : {Math.round(totalVac * 4) / 4}h de révisions · semaine des DS :{" "}
-              {Math.round(totalDsWeek * 4) / 4}h, puis remontée vers 15h+ dès le 9 nov.
-            </p>
-          </Card>
+        /* Badge de synchro */
+        var badge = document.getElementById("syncbadge");
+        if (state.source === "live") { badge.className = "updated ok"; badge.textContent = "🟢 En direct · synchro " + fmtH(state.lastSync); }
+        else if (state.source === "cache") { badge.className = "updated warn"; badge.textContent = "🟡 Hors-ligne · dernière synchro " + fmtH(state.lastSync); }
+        else if (state.source === "fallback") { badge.className = "updated err"; badge.textContent = "🟠 Données de secours · 28 oct."; }
+        else { badge.className = "updated err"; badge.textContent = state.syncing ? "⏳ Synchronisation…" : "🔴 Calendrier à connecter"; }
 
-          {/* ===== Agent ===== */}
-          <Card t={t} className="md:col-span-2">
-            <CardHead
-              t={t}
-              icon={
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: "linear-gradient(135deg,#0A84FF,#AF52DE)" }}>
-                  <IconSparkle2 className="h-5 w-5" style={{ color: "#fff" }} />
-                </span>
-              }
-              title="Ton agent · Vibe"
-              sub="2 automatisations actives"
-              right={
-                <span className="flex items-center gap-1.5 text-[11px] font-semibold" style={{ color: t.green }}>
-                  <span className="h-2 w-2 rounded-full" style={{ background: t.green }} aria-hidden="true" />
-                  En ligne
-                </span>
-              }
-            />
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2.5">
-                {[
-                  { icon: <IconBell className="h-4 w-4" style={{ color: t.blue }} />, title: "Bilan & planning hebdo", when: "chaque vendredi · 20h30", next: "prochain : ven. 6 nov." },
-                  { icon: <IconAlarmClock className="h-4 w-4" style={{ color: t.orange }} />, title: "To-dos du jour", when: "chaque matin · 7h00", next: "récap du jour dans la conversation" },
-                ].map((a) => (
-                  <div key={a.title} className="rounded-xl px-3 py-2.5" style={{ background: t.chip }}>
-                    <div className="flex items-center gap-2 text-[13px] font-semibold">
-                      {a.icon}
-                      {a.title}
-                    </div>
-                    <p className="mt-0.5 text-xs" style={{ color: t.sub }}>
-                      {a.when} · {a.next}
-                    </p>
-                  </div>
-                ))}
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {["planificateur", "suivi-scolaire", "maths", "physique-chimie", "sciences-ingenieur"].map((s) => (
-                    <span
-                      key={s}
-                      className="rounded-full px-2.5 py-1 text-[11px] font-semibold"
-                      style={{ background: `${t.purple}14`, color: t.purple }}
-                      title="Skill — à activer dans Vibe si ce n'est pas déjà fait"
-                    >
-                      {s}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-3">
-                <p className="text-[13px] font-semibold">Parle-moi simplement :</p>
-                <div className="flex flex-wrap gap-2">
-                  {["« mets à jour mon dashboard »", "« bilan de la semaine »", "« planifie mes révisions de SI »", "« ajoute un DM de maths vendredi »"].map((cmd) => (
-                    <span
-                      key={cmd}
-                      className="rounded-full px-3 py-1.5 text-[12px] font-medium"
-                      style={{ background: t.text === "#F5F5F7" ? "#2C2C2E" : "#F2F2F7", color: t.text, border: `1px solid ${t.chipBorder}` }}
-                    >
-                      {cmd}
-                    </span>
-                  ))}
-                </div>
-                <p className="flex items-center gap-1.5 text-[13px] font-semibold">
-                  <IconLink className="h-4 w-4" style={{ color: t.sub }} aria-hidden="true" />
-                  Système
-                </p>
-                <div className="flex flex-wrap gap-2 text-[12px]">
-                  {[
-                    { n: "Notion", r: "base de suivi" },
-                    { n: "Google Calendar", r: "horaires" },
-                    { n: "Notion Calendar", r: "interface" },
-                  ].map((c) => (
-                    <span key={c.n} className="rounded-xl px-3 py-1.5" style={{ background: t.chip }}>
-                      <span className="font-semibold">{c.n}</span>{" "}
-                      <span style={{ color: t.sub }}>— {c.r}</span>
-                    </span>
-                  ))}
-                </div>
-                <p className="text-xs leading-snug" style={{ color: t.sub }}>
-                  Snapshot du {UPDATED}. Le dashboard ne se connecte pas en direct : demande « mets à jour mon dashboard »
-                  et je resynchronise Notion + ton agenda.
-                </p>
-              </div>
-            </div>
-          </Card>
-        </main>
+        /* Bannière d'état */
+        var banner = document.getElementById("banner");
+        if (!urlOk()) {
+          banner.innerHTML = '<div class="banner err" role="alert">🔌 Connecte ton Google Calendar pour activer le temps réel.<p>Google Calendar → ⚙️ Paramètres → Paramètres de mes agendas → ton agenda → « Adresse secrète au format iCal » → copie, puis colle-la dans le fichier <b>index.html</b> à la ligne <b>var ICAL_URL = "…"</b> (remplace COLLE_ICI). En attendant, affichage des données de secours.</p></div>';
+        } else if (state.source === "fallback") {
+          banner.innerHTML = '<div class="banner warn" role="alert">⚠️ Calendrier injoignable pour l\'instant — nouvel essai automatique dans quelques minutes.<p>Affichage des données de secours du 28 octobre.</p></div>';
+        } else if (state.source === "cache") {
+          banner.innerHTML = '<div class="banner warn" role="alert">🟡 Hors-ligne — le calendrier n\'est pas joignable, affichage de la dernière synchro (' + fmtH(state.lastSync) + ").</p></div>";
+        } else banner.innerHTML = "";
 
-        <footer className="mt-8 text-center text-[11px]" style={{ color: t.sub }}>
-          Système personnel Dogukan · Notion + Google Calendar + Notion Calendar · Mis à jour le {UPDATED} ·
-          Conçu pour mobile, tablette et ordinateur
-        </footer>
-      </div>
-    </div>
-  );
-}
+        var days = buildDays();
+        var day = days.find(function (x) { return dkey(x.d) === (selectedDay || todayK); }) || days[0];
+
+        /* Événements à venir (toutes journées confondues) */
+        var upcoming = [];
+        days.forEach(function (x) { x.events.forEach(function (e) { if (e.end > now) upcoming.push(e); }); });
+        var nextFirst = upcoming[0] || null;
+        var ncd = nextFirst ? countdown(now, nextFirst.start) : null;
+
+        /* Héros : prochain DS (config + calendrier) */
+        var dlEvents = DEADLINES.map(function (d) { return { title: d.subject, when: d.when, at: new Date(d.at) }; }).filter(function (h) { return h.at > now; }).sort(function (a, b) { return a.at - b.at; });
+        var dsEvents = upcoming.filter(function (e) { return e.kind === "ds"; });
+        var hero = null;
+        if (dlEvents[0] && (!dsEvents[0] || dlEvents[0].at <= dsEvents[0].start)) hero = { title: dlEvents[0].title, when: dlEvents[0].when, at: dlEvents[0].at, next: dsEvents[0] || dlEvents[1] };
+        else if (dsEvents[0]) hero = { title: dsEvents[0].title, when: frDateTime(dsEvents[0].start), at: dsEvents[0].start, next: dlEvents[0] || dsEvents[1] };
+        else hero = { title: "Tous les DS sont passés 🎉", when: "Profite bien", at: null, next: null };
+        var heroC = hero.at ? countdown(now, hero.at) : null;
+
+        /* Charge de travail */
+        var charge = days.map(function (x) {
+          var h = 0; x.events.forEach(function (e) { if (e.kind === "revision" || e.kind === "travail") h += (e.end - e.start) / 3600000; });
+          return { name: SHORTDAYS[x.d.getDay()] + " " + x.d.getDate(), heures: Math.round(h * 4) / 4, ds: x.events.some(function (e) { return e.kind === "ds"; }) };
+        });
+        var maxH = Math.max(1, Math.max.apply(null, charge.map(function (c) { return c.heures; })));
+        var planifie = weekPlanHours();
+
+        var html = "";
+
+        html += '<section class="card hero" aria-label="Prochain devoir surveillé">' +
+          '<div class="kicker">⏳ Prochain devoir surveillé</div>' +
+          '<p style="font-size:22px;font-weight:700;margin:12px 0 0;line-height:1.15">' + hero.title + "</p>" +
+          '<p class="sub" style="margin:4px 0 0;font-size:14px">' + hero.when + "</p>" +
+          '<div class="tnum" style="display:flex;align-items:flex-end;gap:8px;margin:20px 0 0" aria-live="polite">' +
+          (!heroC || heroC.past
+            ? '<span style="font-size:32px;font-weight:700">Terminé 🎉</span>'
+            : '<span class="big tnum">J–' + heroC.d + '</span><span class="tnum" style="font-size:18px;font-weight:600;padding-bottom:4px;opacity:.9">' + heroC.h + "h" + pad(heroC.m) + "</span>") +
+          "</div>" +
+          '<div style="background:rgba(255,255,255,0.16);border-radius:12px;padding:10px 12px;font-size:13px;font-weight:500;margin-top:16px">' +
+          (hero.next
+            ? "Puis : " + hero.next.title + ' · <b class="tnum">' + (function () { var c = countdown(now, hero.next.at || hero.next.start); return c.past ? "—" : "J–" + c.d; })() + "</b>"
+            : "Aucune autre échéance en vue 🎉") +
+          "</div></section>";
+
+        html += '<section class="card" aria-label="Progression du travail perso">' +
+          '<div class="head"><div class="l"><span class="ico" style="background:rgba(255,59,48,0.1)">📊</span><div><h2>Travail perso — cette semaine</h2><p class="sub">Anneaux : accompli · planifié (auto) · objectif</p></div></div></div>' +
+          '<div style="display:flex;justify-content:center"><svg viewBox="0 0 200 200" width="170" height="170" role="img" aria-label="Accompli ' + RING.fait + " heures sur un objectif de " + RING.objectif + " heures, " + planifie + ' heures planifiées">' +
+          '<g transform="rotate(-90 100 100)">' +
+          '<circle cx="100" cy="100" r="78" fill="none" stroke="var(--chip)" stroke-width="12"/>' + ringSvg("ringR", 78, "var(--red)") +
+          '<circle cx="100" cy="100" r="62" fill="none" stroke="var(--chip)" stroke-width="12"/>' + ringSvg("ringB", 62, "var(--blue)") +
+          '<circle cx="100" cy="100" r="46" fill="none" stroke="var(--chip)" stroke-width="12"/>' + ringSvg("ringG", 46, "var(--green)") +
+          "</g>" +
+          '<text x="100" y="96" text-anchor="middle" font-size="30" font-weight="700" fill="var(--text)">' + fr(planifie) + 'h</text>' +
+          '<text x="100" y="116" text-anchor="middle" font-size="11" fill="var(--sub)">planifiées (auto)</text>' +
+          "</svg></div>" +
+          '<div class="legend">' +
+          [["var(--green)", "Accompli (à ajuster dans le fichier)", RING.fait + "h"], ["var(--blue)", "Planifié cette semaine — calculé en direct", fr(planifie) + "h"], ["var(--red)", "Objectif max / semaine", RING.objectif + "h"]].map(function (r) {
+            return '<div class="row"><span class="lbl"><span class="dot" style="background:' + r[0] + '"></span>' + r[1] + '</span><b class="tnum">' + r[2] + "</b></div>";
+          }).join("") +
+          "</div></section>";
+
+        html += '<section class="card" aria-label="Prochaine activité">' +
+          '<div class="head"><div class="l"><span class="ico" style="background:rgba(0,122,255,0.1)">🔔</span><div><h2>À venir' + (nextFirst && ncd && !ncd.past ? " — dans " + (ncd.d > 0 ? "J–" + ncd.d : ncd.h + "h" + pad(ncd.m)) : "") + '</h2><p class="sub">' + (upcoming.length ? upcoming.length + " créneau" + (upcoming.length > 1 ? "x" : "") + " dans les " + DAYS_COUNT + " prochains jours" : "aucun créneau") + "</p></div></div></div>";
+        if (upcoming.length) {
+          html += upcoming.slice(0, 5).map(function (ev) { return evRow(ev, false, ev === nextFirst, now, dkey(ev.start) !== todayK); }).join("");
+          if (upcoming.length > 5) html += '<p style="font-size:12px;font-weight:600;color:var(--sub);padding:4px 8px 0">+ ' + (upcoming.length - 5) + " autres — voir le planning ↓</p>";
+        } else {
+          html += '<p style="font-size:14px;color:var(--sub)">Rien à venir dans ton agenda pour les ' + DAYS_COUNT + ' prochains jours.</p>';
+        }
+        html += "</section>";
+
+        html += '<section class="card span2" aria-label="Planning">' +
+          '<div class="head"><div class="l"><span class="ico" style="background:rgba(175,82,222,0.1)">🎯</span><div><h2>Planning — ' + DAYS_COUNT + ' jours</h2><p class="sub">' + frDate(day.d) + '</p></div></div><span class="pill p">' + day.events.length + " créneau" + (day.events.length > 1 ? "x" : "") + "</span></div>" +
+          '<div class="chips" role="tablist" aria-label="Choisir un jour">' +
+          days.map(function (x) {
+            var k = dkey(x.d);
+            var hasDs = x.events.some(function (e) { return e.kind === "ds"; });
+            var hasSp = x.events.some(function (e) { return e.kind === "sport"; });
+            return '<button type="button" role="tab" aria-selected="' + (k === dkey(day.d)) + '" data-day="' + k + '" aria-label="' + frDate(x.d) + '">' + SHORTDAYS[x.d.getDay()] + " " + x.d.getDate() +
+              '<span class="cdots">' +
+              (hasDs ? '<span class="dot" style="width:6px;height:6px;background:' + (k === dkey(day.d) ? "#fff" : "var(--red)") + '"></span>' : "") +
+              (hasSp ? '<span class="dot" style="width:6px;height:6px;background:' + (k === dkey(day.d) ? "#fff" : "var(--green)") + '"></span>' : "") +
+              "</span></button>";
+          }).join("") + "</div>" +
+          '<div class="timeline">' + (day.events.length
+            ? day.events.map(function (ev) { return evRow(ev, dkey(day.d) === todayK && ev.end <= now, false, now, false); }).join("")
+            : '<p style="font-size:14px;color:var(--sub);padding:8px">Aucun créneau ce jour-là dans ton agenda.</p>') + "</div>" +
+          '<p class="note"><span class="lbl"><span class="dot" style="width:6px;height:6px;background:var(--red)"></span> DS</span><span class="lbl"><span class="dot" style="width:6px;height:6px;background:var(--green)"></span> Sport</span><span class="lbl"><span class="dot" style="width:6px;height:6px;background:var(--purple)"></span> Révision</span>Synchronisé automatiquement avec ton Google Calendar</p></section>';
+
+        html += '<section class="card" aria-label="Échéances">' +
+          '<div class="head"><div class="l"><span class="ico" style="background:rgba(255,59,48,0.1)">🎯</span><div><h2>Échéances</h2><p class="sub">Préparation des DS</p></div></div></div>';
+        DEADLINES.forEach(function (dl) {
+          var c = countdown(now, new Date(dl.at));
+          var pct = Math.round((dl.done / dl.total) * 100);
+          html += '<div class="dl"><div class="topline"><span class="n">' + dl.icon + " " + dl.subject + '</span><span class="pill ' + (c.past ? "g" : "o") + '">' + (c.past ? "Terminé" : "J–" + c.d) + '</span></div>' +
+            '<p class="when">' + dl.when + " · Préparation en cours</p>" +
+            '<div class="prow"><div class="pbar"><div data-w="' + pct + '" style="width:' + (animated ? pct : 0) + '%"></div></div><span class="ct tnum">' + dl.done + "/" + dl.total + " révisions</span></div></div>";
+        });
+        html += '<div class="box rowline"><span style="font-size:13px;font-weight:600">🚀 ApprentyHunter</span><span class="pill p">Projet perso</span></div></section>';
+
+        var sports = upcoming.filter(function (e) { return e.kind === "sport"; });
+        html += '<section class="card" aria-label="Sport">' +
+          '<div class="head"><div class="l"><span class="ico" style="background:rgba(52,199,89,0.12)">❤️</span><div><h2>Sport</h2><p class="sub">Créneaux fixes — intouchables</p></div></div></div>' +
+          STATIC_SPORT.map(function (s) { return '<div class="rowline" style="margin-bottom:10px"><b>' + s.t + '</b><span class="r">' + s.r + "</span></div>"; }).join("") +
+          (sports.length ? '<p class="sect" style="margin-top:12px">Prochains créneaux (auto depuis ton agenda) :</p>' + sports.slice(0, 4).map(function (e) { return '<div class="sportline"><span>' + e.title + '</span><span class="tnum" style="color:var(--sub)">' + frDateTime(e.start) + " – " + fmtH(e.end) + "</span></div>"; }).join("") : '<div class="box" style="margin-top:10px"><p style="font-size:13px;color:var(--sub)">Aucun créneau sportif à venir dans l\'agenda.</p></div>') + "</section>";
+
+        html += '<section class="card" aria-label="Objectifs">' +
+          '<div class="head"><div class="l"><span class="ico" style="background:rgba(0,122,255,0.1)">🚀</span><div><h2>Objectifs</h2><p class="sub">Cap sur 2027–2028</p></div></div></div>' +
+          '<div class="bignum tnum">19+<small>/20</small></div>' +
+          OBJECTIFS.map(function (g) { return '<div class="goal">' + g + "</div>"; }).join("") + "</section>";
+
+        html += '<section class="card" aria-label="Suivi des notes">' +
+          '<div class="head"><div class="l"><span class="ico" style="background:rgba(0,163,191,0.1)">📚</span><div><h2>Suivi des notes</h2><p class="sub">Base Notion « Notes »</p></div></div></div>' +
+          (NOTES.length
+            ? NOTES.map(function (n) { return '<div class="sportline"><span>' + n.subject + '</span><span class="tnum" style="color:var(--sub)">' + n.value + " · " + n.date + "</span></div>"; }).join("")
+            : '<div class="box" style="display:flex;gap:12px;align-items:center"><span style="font-size:28px">📝</span><p style="font-size:13px;color:var(--sub)"><b style="color:var(--text)">Aucune note pour l\'instant.</b> Saisis tes notes dans Notion — elles apparaîtront ici à la prochaine mise à jour du fichier.</p></div>') +
+          '<p style="font-size:12px;color:var(--sub);margin-top:12px">Objectif : rester au-dessus de 19 de moyenne générale.</p></section>';
+
+        html += '<section class="card" aria-label="Charge de travail">' +
+          '<div class="head"><div class="l"><span class="ico" style="background:rgba(0,122,255,0.1)">📊</span><div><h2>Charge de travail perso</h2><p class="sub">Heures planifiées · ' + DAYS_COUNT + ' prochains jours</p></div></div></div>' +
+          '<div class="chart">' + charge.map(function (c) {
+            return '<div class="col"><div class="bar" style="height:' + Math.max(2, (c.heures / maxH) * 100) + '%" title="' + fr(c.heures) + ' h de travail perso"></div><span class="lbl">' + c.name + (c.ds ? " ⚠️" : "") + "</span></div>";
+          }).join("") + "</div></section>";
+
+        html += '<section class="card span2" aria-label="Agent Vibe">' +
+          '<div class="head"><div class="l"><span class="ico" style="background:linear-gradient(135deg,#0a84ff,#af52de);color:#fff">✨</span><div><h2>Ton agent · Vibe</h2><p class="sub">2 automatisations actives</p></div></div><span style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:' + (state.source === "live" ? "var(--green)" : "var(--orange)") + '"><span class="dot"></span>' + (state.source === "live" ? "Temps réel" : "Sync en attente") + "</span></div>" +
+          '<div class="agent"><div>' +
+          '<div class="auto"><div class="t">🔔 Bilan &amp; planning hebdo</div><p class="d">chaque vendredi · 20h30</p></div>' +
+          '<div class="auto"><div class="t">⏰ To-dos du jour</div><p class="d">chaque matin · 7h00</p></div>' +
+          '<div class="skills">' + ["planificateur", "suivi-scolaire", "maths", "physique-chimie", "sciences-ingenieur"].map(function (s) { return "<span>" + s + "</span>"; }).join("") + "</div></div>" +
+          '<div><p class="sect">Le site se met à jour tout seul :</p>' +
+          '<div class="cmds">' + ["Planning : en direct depuis Google Calendar", "Compteur DS : recalculé toutes les 30 s", "Synchro calendrier : toutes les 5 min", "DS, notes, objectifs : bloc CONFIG du fichier"].map(function (c) { return "<span>" + c + "</span>"; }).join("") + "</div>" +
+          '<p class="sect" style="margin-top:16px">🔗 Système</p><div class="sys">' +
+          "<span><b>Notion</b> — base de suivi</span><span><b>Google Calendar</b> — horaires</span><span><b>Notion Calendar</b> — interface</span></div>" +
+          '<p style="font-size:12px;color:var(--sub);margin-top:12px">Ce site lit directement ton agenda : chaque créneau ajouté, déplacé ou supprimé dans Google Calendar apparaît ici en quelques minutes, sans rien faire.</p></div></div></section>';
+
+        app.innerHTML = html;
+        var newChip = document.querySelector(".chips");
+        if (newChip) newChip.scrollLeft = chipScroll;
+
+        if (!animated) {
+          animated = true;
+          setTimeout(function () {
+            [["ringR", 78, 1], ["ringB", 62, planifie / RING.objectif], ["ringG", 46, RING.fait / RING.objectif]].forEach(function (rg) {
+              var el = document.getElementById(rg[0]);
+              if (el) el.setAttribute("stroke-dashoffset", String(2 * Math.PI * rg[1] * (1 - Math.min(1, rg[2]))));
+            });
+            document.querySelectorAll(".pbar > div").forEach(function (b) { b.style.width = b.getAttribute("data-w") + "%"; });
+          }, 80);
+        }
+      }
+
+      /* ---------- Thème ---------- */
+      var themeMode = "auto";
+      try { themeMode = localStorage.getItem("dogukan-dash-theme") || "auto"; } catch (e) {}
+      function applyTheme() {
+        var dark = themeMode === "dark" || (themeMode === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute("content", dark ? "#000000" : "#F2F2F7");
+      }
+      function renderSeg() {
+        var seg = document.getElementById("themeseg");
+        var opts = [["auto", "↻", "Auto"], ["light", "☀️", "Clair"], ["dark", "🌙", "Sombre"]];
+        seg.innerHTML = opts.map(function (o) {
+          return '<button type="button" role="radio" aria-checked="' + (themeMode === o[0]) + '" data-mode="' + o[0] + '" aria-label="Thème ' + o[2].toLowerCase() + '">' + o[1] + " " + o[2] + "</button>";
+        }).join("");
+      }
+      document.getElementById("themeseg").addEventListener("click", function (e) {
+        var b = e.target.closest("button[data-mode]");
+        if (!b) return;
+        themeMode = b.getAttribute("data-mode");
+        try { localStorage.setItem("dogukan-dash-theme", themeMode); } catch (err) {}
+        renderSeg(); applyTheme();
+      });
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () { if (themeMode === "auto") applyTheme(); });
+
+      /* ---------- Interactions & minuteurs ---------- */
+      document.getElementById("app").addEventListener("click", function (e) {
+        var b = e.target.closest("button[data-day]");
+        if (!b) return;
+        selectedDay = b.getAttribute("data-day");
+        render();
+      });
+      document.getElementById("refreshbtn").addEventListener("click", function () { sync(); });
+
+      renderSeg();
+      applyTheme();
+      render();
+      sync();
+      setInterval(render, 30000);                       // compteurs en temps réel
+      setInterval(function () { sync(); }, SYNC_EVERY_MS); // données toutes les 5 min
+      document.addEventListener("visibilitychange", function () {
+        if (!document.hidden && Date.now() - (state.lastSync ? state.lastSync.getTime() : 0) > SYNC_EVERY_MS) sync();
+      });
+    </script>
+  </body>
+</html>
